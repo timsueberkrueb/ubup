@@ -33,13 +33,13 @@ scripts:
 
 The keys of the top-level dictionary (e.g. `folders`, `apt-packages` ...)
 and the schema of the associated values are defined by plugins. There
-is a set of [built-in plugins](#Built-in-Plugins) that ship with ubup. If you cannot find
+is a set of [built-in plugins](#built-in-plugins) that ship with ubup. If you cannot find
 an existing plugin that fits your need, you can ...
 
 * write your own bash script ...
   * ... inline via the [`scriptlets` plugin](#scriptlets)
   * ... in a seperate file, referencing it using the [`scripts` plugin](#scripts)
-* create your own [custom plugin](#Custom-Plugins)
+* create your own [custom plugin](#custom-plugins)
 
 If you need control over the sequence in which setup instructions are performed,
 you can use the alternative step-based schema:
