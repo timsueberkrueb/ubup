@@ -10,6 +10,10 @@ ubup
 
 Automate the steps you run after installing Ubuntu in a declarative way.
 
+## Requirements
+
+* Ubuntu 16.04 or later (Python 3.5 or higher)
+
 ## Configuration
 
 Setup configuration is stored in declarative `setup.yaml` files:

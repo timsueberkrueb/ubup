@@ -37,7 +37,7 @@ class ScriptletsPlugin(plugins.AbstractPlugin):
     def perform(self):
         scriptlets = self.config
         for scriptlet_name in scriptlets.keys():
-            with tempfile.NamedTemporaryFile('w', prefix=f'{scriptlet_name}_',
+            with tempfile.NamedTemporaryFile('w', prefix='{}_'.format(scriptlet_name),
                                              suffix='.sh', encoding='utf-8', delete=False) as file:
                 file.write(scriptlets[scriptlet_name])
             self.run_command('/bin/bash', file.name)
@@ -52,7 +52,7 @@ class ScriptsPlugin(plugins.AbstractPlugin):
         for filename in scripts:
             filename = self._expand_path(filename)
             if not os.path.isfile(filename):
-                raise plugins.PluginError(f'The file {filename} doesn\'t exist', self.key)
+                raise FileNotFoundError('The file {} doesn\'t exist'.format(filename), self.key)
             self.run_command('/bin/bash', filename)
 
 

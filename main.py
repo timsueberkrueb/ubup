@@ -12,7 +12,7 @@ def main(data_path: str):
     setup_filename = os.path.join(data_path, 'setup.yaml')
 
     if not os.path.isfile(setup_filename):
-        raise click.ClickException(f'The file {setup_filename} does not exist')
+        raise click.ClickException('The file {} does not exist'.format(setup_filename))
 
     setup = config.Setup(data_path)
     setup.load_plugins()

@@ -71,5 +71,5 @@ class AbstractPlugin(abc.ABC):
             path = path.replace(var, os.environ[var] if var in os.environ else '')
         # Support paths relative to the data directory
         if not path.startswith('/'):
-            path = f'{self.data_path}/{path}'
+            path = '{}/{}'.format(self.data_path, path)
         return path

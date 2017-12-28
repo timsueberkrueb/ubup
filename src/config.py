@@ -43,7 +43,7 @@ class Setup:
         self._data_path = data_path
         self._plugins_schema_root = {}
         self._advanced_schema_root = {}
-        self._plugins: Dict[str, Type[plugins.AbstractPlugin]] = []
+        self._plugins = []
         self._config = None
 
     def load_plugins(self):
@@ -67,15 +67,15 @@ class Setup:
         step_number_placeholder = '{' + ':0{}d'.format(step_number_max_len) + '}'
         for i, step in enumerate(self._config['steps']):
             if steps_count != 1:
-                log.header(f'Performing step {step_number_placeholder.format(i+1)} '
-                           f'of {step_number_placeholder.format(steps_count)}')
+                log.header('Performing step {} '.format(step_number_placeholder.format(i+1))
+                           + 'of {}'.format(step_number_placeholder.format(steps_count)))
             for plugin_key in step.keys():
                 if plugin_key not in self._plugins:
-                    raise SetupError(f'Unknown plugin "{plugin_key}" in configuration')
+                    raise SetupError('Unknown plugin "{}" in configuration'.format(plugin_key))
                 plugin_config = step[plugin_key]
                 plugin_cls = self._plugins[plugin_key]
                 plugin_inst = plugin_cls(plugin_config, self._data_path)
-                log.information(f'Performing plugin {plugin_key}')
+                log.information('Performing plugin {}'.format(plugin_key))
                 plugin_inst.perform()
 
     def _load_custom_plugins(self) -> List[Type[plugins.AbstractPlugin]]:
@@ -91,9 +91,9 @@ class Setup:
         self._plugins = {}
         for plugin in plugins_list:
             if plugin.key == _RESERVED_PLUGIN_NAMES:
-                raise SetupError(f'Plugin with reserved name {plugin.key}')
+                raise SetupError('Plugin with reserved name {}'.format(plugin.key))
             if plugin.key in self._plugins:
-                raise SetupError(f'Duplicate plugin key {plugin.key}')
+                raise SetupError('Duplicate plugin key {}'.format(plugin.key))
             self._plugins[plugin.key] = plugin
             self._plugins_schema_root[schema.Optional(plugin.key)] = plugin.schema
         self._advanced_schema_root = {
