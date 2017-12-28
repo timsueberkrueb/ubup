@@ -47,7 +47,7 @@ apt-get -y -q update && apt-get -y -q upgrade
 
 apt-get -y -q install python3 python3-pip
 
-pip3 install click pyyaml schema
+pip3 install click ruamel.yaml schema
 
 # Perform setup
 

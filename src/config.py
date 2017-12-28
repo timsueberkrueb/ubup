@@ -4,9 +4,8 @@ from typing import List, Type, Dict
 
 import os
 import glob
-import yaml
+import ruamel.yaml as yaml
 import schema
-import math
 
 from . import builtin_plugins
 from . import plugin_support
@@ -16,21 +15,15 @@ from . import log
 
 # Names that cannot be used as plugin keys
 _RESERVED_PLUGIN_NAMES = (
-    'steps',
     'author',
     'description',
-    'revision',
-    'version',
-    'last_updated'
+    'setup'
 )
 
 
 _OPTIONAL_META_SCHEMA = {
     schema.Optional('author'): str,
     schema.Optional('description'): str,
-    schema.Optional('revision'): int,
-    schema.Optional('version'): str,
-    schema.Optional('last_updated'): str,
 }
 
 
@@ -41,10 +34,12 @@ class SetupError(Exception):
 class Setup:
     def __init__(self, data_path: str):
         self._data_path = data_path
-        self._plugins_schema_root = {}
-        self._advanced_schema_root = {}
-        self._plugins = []
+        self._plugins = {}
         self._config = None
+
+        self._action_schema = {}
+
+        self._schema_root = {}
 
     def load_plugins(self):
         custom_plugins = self._load_custom_plugins()
@@ -52,31 +47,37 @@ class Setup:
 
     def load_config(self, filename: str):
         with open(filename) as file:
-            data = yaml.load(file)
+            y = yaml.YAML()
+            data = y.load(file)
+
+        # Support minimal schema without metadata
+        if 'setup' not in data:
+            data = {'setup': data}
 
         self._validate_schema(data)
-
-        if 'steps' not in data:
-            data = {'steps': [data]}
 
         self._config = data
 
     def perform(self):
-        steps_count = len(self._config['steps'])
-        step_number_max_len = math.ceil(math.log10(steps_count + 1))
-        step_number_placeholder = '{' + ':0{}d'.format(step_number_max_len) + '}'
-        for i, step in enumerate(self._config['steps']):
-            if steps_count != 1:
-                log.header('Performing step {} '.format(step_number_placeholder.format(i+1))
-                           + 'of {}'.format(step_number_placeholder.format(steps_count)))
-            for plugin_key in step.keys():
-                if plugin_key not in self._plugins:
-                    raise SetupError('Unknown plugin "{}" in configuration'.format(plugin_key))
-                plugin_config = step[plugin_key]
-                plugin_cls = self._plugins[plugin_key]
-                plugin_inst = plugin_cls(plugin_config, self._data_path)
-                log.information('Performing plugin {}'.format(plugin_key))
-                plugin_inst.perform()
+        root = self._config['setup']
+        self._perform_node(root, node_name='ROOT')
+
+    def _perform_node(self, node_content: Dict, node_name: str=''):
+        log.information('Visiting node {}'.format(node_name))  # TODO: Improve logging
+        for child_key in node_content.keys():
+            child_value = node_content[child_key]
+            if child_key.startswith('$'):
+                self._perform_action(child_key[1:], child_value)
+            else:
+                self._perform_node(child_value, node_name=child_key)
+
+    def _perform_action(self, key: str, config: object):
+        if key not in self._plugins:
+            raise SetupError('Unknown plugin key "{}"'.format(key))
+        plugin_cls = self._plugins[key]
+        plugins_inst = plugin_cls(config, self._data_path)
+        log.information('Performing plugin {}'.format(key))  # TODO: Improve logging
+        plugins_inst.perform()
 
     def _load_custom_plugins(self) -> List[Type[plugins.AbstractPlugin]]:
         plugins_list = []
@@ -87,7 +88,7 @@ class Setup:
         return plugins_list
 
     def _set_plugins(self, plugins_list: List[Type[plugins.AbstractPlugin]]):
-        self._plugins_schema_root = {}
+        self._action_schema = {}
         self._plugins = {}
         for plugin in plugins_list:
             if plugin.key == _RESERVED_PLUGIN_NAMES:
@@ -95,23 +96,19 @@ class Setup:
             if plugin.key in self._plugins:
                 raise SetupError('Duplicate plugin key {}'.format(plugin.key))
             self._plugins[plugin.key] = plugin
-            self._plugins_schema_root[schema.Optional(plugin.key)] = plugin.schema
-        self._advanced_schema_root = {
+            self._action_schema[schema.Optional('$' + plugin.key)] = plugin.schema
+        self._category_schema = {
+            # Recursive validation of child categories (may not start with '$')
+            schema.Optional(lambda key: type(key) == str and not key.startswith('$')):
+                lambda value: schema.Schema(self._category_schema).validate(value),
+            # Validation of child actions (must start with '$')
+            **self._action_schema,
+        }
+        self._schema_root = {
             **_OPTIONAL_META_SCHEMA,
-            'steps': [
-                self._plugins_schema_root
-            ]
+            'setup': self._category_schema
         }
 
     def _validate_schema(self, data):
-        # Require the root structure to be a dictionary
-        schema.Schema(dict).validate(data)
-
-        # Allow a list of steps for control over execution sequence
-        if 'steps' in data:
-            steps_schema = schema.Schema(self._advanced_schema_root)
-            steps_schema.validate(data)
-        # Simple schema variation consists of just one step
-        else:
-            simple_schema = schema.Schema(self._plugins_schema_root)
-            simple_schema.validate(data)
+        s = schema.Schema(self._schema_root)
+        s.validate(data)

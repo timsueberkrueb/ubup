@@ -16,47 +16,72 @@ Automate the steps you run after installing Ubuntu in a declarative way.
 
 ## Configuration
 
-Setup configuration is stored in declarative `setup.yaml` files:
+Setup configuration is stored in declarative `setup.yaml` files. They consist
+of three types of elements: actions, categories and metadata.
+
+### Actions
+
+Categories and metadata are optional features, meaning you can create a
+completely valid and functional `setup.yaml` files by using actions only:
 
 ```yaml
-folders:
+$folders:
   - ~/Apps
   - ~/Projects
-apt-packages:
+$apt-packages:
   - fish
   - cowsay
-snap-packages:
+$snap-packages:
   - vscode
   - discord
-scriptlets:
-  hello: |
-    echo "Hello world :D"
-scripts:
+$scriptlet: |
+  echo "Hello world :D"
+$scripts:
   - myscript.sh
 ```
 
-The keys of the top-level dictionary (e.g. `folders`, `apt-packages` ...)
-and the schema of the associated values are defined by plugins. There
-is a set of [built-in plugins](#built-in-plugins) that ship with ubup. If you cannot find
-an existing plugin that fits your need, you can ...
+As you might have guessed, keys beginning with `$` (e.g. `$folders`,
+`$apt-packages`) and their values are called actions. They represent setup
+instructions in your configuration.
+
+Their names (or keys), schemata and functionalities are defined by plugins.
+There is a set of [built-in plugins](#built-in-plugins) that ship with ubup.
+
+If you cannot find an existing plugin that fits your need, you can ...
 
 * write your own bash script ...
-  * ... inline via the [`scriptlets` plugin](#scriptlets)
-  * ... in a seperate file, referencing it using the [`scripts` plugin](#scripts)
+  * inline via the [`scriptlet` plugin](#scriptlet)
+  * in a seperate file, referencing it using the [`scripts` plugin](#scripts)
 * create your own [custom plugin](#custom-plugins)
 
-If you need control over the sequence in which setup instructions are performed,
-you can use the alternative step-based schema:
+Sequence matters in many cases and therefore the order of actions is
+preserved when ubup performs your setup.
+
+### Categories
+
+To archive a more organized structure, you can use optional categories.
 
 ```yaml
-steps:
-  - folders:
-    - ~/Apps
-    # ...
-  - scripts:
-    - download-appimages.sh
-    # ...
+apps:
+  $snap-packages:
+    - chromium
+    - vlc
+  appimages:
+    foo:
+      $scriptlet: |
+        # ...
+    bar:
+      # ...
+  # ...
 ```
+
+All keys that don't start with `$` and that are not metadata keys are
+treated as categories. Their main purpose is to support a better structure.
+
+Categories can contain subcategories or actions and the order of categories
+is preserved.
+
+### Metadata
 
 Optionally, you can specify some additional metadata:
 
@@ -65,11 +90,19 @@ author: John Doe <john.doe@example.com>
 description: |
   Tested on Ubuntu 17.10
   ...
-revision: 10
-version: '0.1.0'
-last_updated: '2017/10/10'
-steps: # ...
+setup:
+  foo: # category
+    $apt-packages: # action
+      # ...
 ```
+
+Where `setup` contains the root for all categories and actions.
+You may not mix metadata with actions or categories and metadata keys
+are not allowed to be reused as category names.
+
+Supported metadata keys are:
+* `author: <str>`: The author of the configuration file
+* `description: <str>`: A description of the configuration file
 
 ## Perform Setup
 
@@ -117,7 +150,7 @@ to perform your setup.
 Install a set of packages via `apt`.
 
 ```yaml
-apt-packages:
+$apt-packages:
   - foo
   - bar
   # ...
@@ -130,21 +163,19 @@ You can use `~` or `$HOME` as placeholders for the home directory
 and `$USER` as placeholder for the username of the current user.
 
 ```yaml
-folders:
+$folders:
   - foo
   - bar
   # ...
 ```
 
-### scriptlets
+### scriptlet
 
-Run inline bash script snippets.
+Run an inline bash script snippet.
 
 ```yaml
-scriptlets:
-  hello: |
+$scriptlet: |
     echo "Hello World"
-  foo: |
     # ...
 ```
 
@@ -153,7 +184,7 @@ scriptlets:
 Run a set of separate bash scripts.
 
 ```yaml
-scripts:
+$scripts:
   - hello.sh
   - scripts/foo.sh
   - scripts/bar.sh
@@ -163,8 +194,8 @@ scripts:
 
 Install a set of snap packages.
 
-You can either just define the names of the packages to install or provide a
-dictionary with additional options in the following schema:
+You can either just define the names of the packages to install or
+provide a dictionary with additional options in the following schema:
 ```
 <snap-package>:
     <option-key>: <option-value>
@@ -178,7 +209,7 @@ The following options are supported:
 * `devmode <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement)
 
 ```yaml
-snap-packages:
+$snap-packages:
   - foo
   - bar:
       classic: true
@@ -193,8 +224,11 @@ Custom plugins can be created in a folder called `plugins`
 next to the `setup.yaml`.
 This folder may contain a set of Python files (`*.py`).
 Each Python file may contain one or more
-Python classes with a class name ending with `Plugin` (e.g. `BarPlugin`, `MyPlugin`
-and even `Plugin` are valid plugin class names).
+Python classes with a class name ending with `Plugin` (e.g. `BarPlugin`,
+`MyPlugin` and even `Plugin` are valid plugin class names).
+
+**Note:** There is one exception: you may not call your plugin class
+`AbstractPlugin`. If you do so, the class will be simply ignored.
 
 ubup provides a lightweight plugin API which can be imported using
 
@@ -220,9 +254,6 @@ from ubup import AbstractPlugin
 ```
 
 ---
-
-**Note:** You should not call your plugin class `AbstractPlugin`.
-If you do so, the class will be ignored.
 
 A hello world plugin `plugins/hello-world.py` is as simple as:
 
@@ -252,7 +283,7 @@ plugin is performed.
 This would be a valid `setup.yaml` for this example plugin:
 
 ```yaml
-hello: world
+$hello: world
 ```
 
 `self.config` will contain the string `"world"`.
@@ -260,7 +291,7 @@ hello: world
 This wouldn't be a valid configuration for this example plugin:
 
 ```yaml
-hello:
+$hello:
   - a
   - b
   - c

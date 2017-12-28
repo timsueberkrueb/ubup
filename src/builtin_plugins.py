@@ -28,19 +28,15 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
                 os.mkdir(folder)
 
 
-class ScriptletsPlugin(plugins.AbstractPlugin):
-    key = 'scriptlets'
-    schema = {
-        str: str
-    }
+class ScriptletPlugin(plugins.AbstractPlugin):
+    key = 'scriptlet'
+    schema = str
 
     def perform(self):
-        scriptlets = self.config
-        for scriptlet_name in scriptlets.keys():
-            with tempfile.NamedTemporaryFile('w', prefix='{}_'.format(scriptlet_name),
-                                             suffix='.sh', encoding='utf-8', delete=False) as file:
-                file.write(scriptlets[scriptlet_name])
-            self.run_command('/bin/bash', file.name)
+        with tempfile.NamedTemporaryFile('w', prefix='scriptlet_',
+                                         suffix='.sh', encoding='utf-8', delete=False) as file:
+            file.write(self.config)
+        self.run_command('/bin/bash', file.name)
 
 
 class ScriptsPlugin(plugins.AbstractPlugin):
@@ -73,7 +69,12 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
     def perform(self):
         packages = self.config
         for package in packages:
-            if type(package) == dict:
+            # Using type(package) == dict here is not enough because
+            # while a subclass of dict will be passed as config,
+            # it is not guaranteed what concrete subclass
+            # that will be. Currently, CommentedMap from ruamel.yaml
+            # is used, but this may change in the future!
+            if issubclass(type(package), dict):
                 for package_name in package.keys():
                     options = package[package_name]
                     cmd = ['snap', 'install']
@@ -94,7 +95,7 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
 BUILTIN_PLUGINS = (
     AptPackagesPlugin,
     CreateFoldersPlugin,
-    ScriptletsPlugin,
+    ScriptletPlugin,
     ScriptsPlugin,
     SnapPackagesPlugin
 )
