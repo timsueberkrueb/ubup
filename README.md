@@ -101,7 +101,7 @@ Add the `ubup` repository as a submodule:
 ```
 # Note: It is recommended to use the master branch to
 # ensure you run with a stable version of ubup.
-git submodule add -b master https://github.com/tim-sueberkrueb/ubup
+git submodule add -b master https://github.com/tim-sueberkrueb/ubup.git
 git submodule update --init
 ```
 
