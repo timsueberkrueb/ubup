@@ -181,10 +181,10 @@ The following options are supported:
 snap-packages:
   - foo
   - bar:
-    classic: true
-    channel: latest/stable
-    jailmode: false
-    devmode: false
+      classic: true
+      channel: latest/stable
+      jailmode: false
+      devmode: false
 ```
 
 ## Custom Plugins
