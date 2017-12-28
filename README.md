@@ -12,7 +12,7 @@ Automate the steps you run after installing Ubuntu in a declarative way.
 
 ## Requirements
 
-* Ubuntu 16.04 or later (Python 3.5 or higher)
+* Ubuntu 16.04 or later (Python >= 3.5)
 
 ## Configuration
 
@@ -76,7 +76,7 @@ steps: # ...
 To perform your setup, simply run
 
 ```
-path/to/ubup/setup
+./path/to/ubup/setup
 ```
 
 in the folder that contains your `setup.yaml`.
