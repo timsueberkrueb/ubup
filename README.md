@@ -132,8 +132,9 @@ git init
 Add the `ubup` repository as a submodule:
 
 ```
-# Note: It is recommended to use the master branch to
+# Note: It will be recommended to use the master branch to
 # ensure you run with a stable version of ubup.
+# There is no stable release and therefore no master branch, yet.
 git submodule add -b master https://github.com/tim-sueberkrueb/ubup.git
 git submodule update --init
 ```
@@ -217,6 +218,12 @@ $snap-packages:
       jailmode: false
       devmode: false
 ```
+
+---
+
+Looks a bit sparse? Create a pull request to add your plugin!
+
+---
 
 ## Custom Plugins
 
