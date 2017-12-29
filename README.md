@@ -10,6 +10,8 @@ ubup
 
 Automate the steps you run after installing Ubuntu in a declarative way.
 
+## Demo
+
 [![asciicast demo](https://asciinema.org/a/ez4shsis8aCZBsHdIP7NxO4p1.png)](https://asciinema.org/a/ez4shsis8aCZBsHdIP7NxO4p1)
 
 ## Requirements
