@@ -94,26 +94,35 @@ class Setup:
 
         self._config = data
 
-    def perform(self):
+    def perform(self, indent: bool=False):
         root = self._config['setup']
-        self._perform_node(root)
+        self._perform_node(root, indent=indent)
 
-    def _perform_node(self, node_content: Dict, node_name: str=''):
+    def _perform_node(self, node_content: Dict, node_name: str='', indent_level: int=-1, indent: bool=False):
         if node_name != '':
-            log.header('🔖 Visiting {}'.format(node_name))
+            log.header(('  ' * indent_level if indent else '') + '🔖{}:'.format(node_name))
         for child_key in node_content.keys():
             child_value = node_content[child_key]
             if child_key.startswith('$'):
-                self._perform_action(child_key[1:], child_value)
+                self._perform_action(
+                    child_key[1:],
+                    child_value,
+                    indent_level=indent_level+1, indent=indent
+                )
             else:
-                self._perform_node(child_value, node_name=child_key)
+                self._perform_node(
+                    child_value,
+                    node_name=child_key,
+                    indent_level=indent_level+1,
+                    indent=indent
+                )
 
-    def _perform_action(self, key: str, config: object):
+    def _perform_action(self, key: str, config: object, indent_level: int=-1, indent: bool=False):
         if key not in self._plugins:
             raise SetupError('Unknown plugin key "{}"'.format(key))
         plugin_cls = self._plugins[key]
         plugins_inst = plugin_cls(config, self._data_path)
-        _track_progress('⚡ Performing {}'.format(key), plugins_inst.perform)
+        _track_progress(('  ' * indent_level if indent else '') + '⚡{}'.format(key), plugins_inst.perform)
 
     def _load_custom_plugins(self) -> List[Type[plugins.AbstractPlugin]]:
         plugins_list = []

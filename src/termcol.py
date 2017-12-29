@@ -12,33 +12,33 @@ class COLORS:
     UNDERLINE = '\033[4m'
 
 
-def _colorize(text: str, color) -> str:
+def _colorize(text: str, color, bold: bool=False, underline: bool=False) -> str:
+    if bold:
+        color += COLORS.BOLD
+    if underline:
+        color += COLORS.UNDERLINE
     return color + text + COLORS.ENDC
 
 
-def header(text: str) -> str:
-    return _colorize(text, COLORS.HEADER)
+def header(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.HEADER, bold=bold, underline=underline)
 
 
-def information(text: str) -> str:
-    return _colorize(text, COLORS.INFORMATION)
+def information(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.INFORMATION, bold=bold, underline=underline)
 
 
-def success(text: str) -> str:
-    return _colorize(text, COLORS.SUCCESS)
+def success(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.SUCCESS, bold=bold, underline=underline)
 
 
-def warning(text: str) -> str:
-    return _colorize(text, COLORS.WARNING)
+def warning(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.WARNING, bold=bold, underline=underline)
 
 
-def error(text: str) -> str:
-    return _colorize(text, COLORS.ERROR)
+def error(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.ERROR, bold=bold, underline=underline)
 
 
-def bold(text: str) -> str:
-    return _colorize(text, COLORS.BOLD)
-
-
-def underline(text: str) -> str:
-    return _colorize(text, COLORS.UNDERLINE)
+def regular(text: str, bold: bool=False, underline: bool=False) -> str:
+    return _colorize(text, COLORS.BOLD, bold=bold, underline=underline)

@@ -20,28 +20,21 @@ function ask_continue(){
 function request_install_dependencies() {
     # Ask for confirmation
 
+    echo -e "${C_BOLD_SUCCESS}🚀 Hey ${SUDO_USER}, let's setup your system!${C_END}"
     echo -e "${C_BOLD_HEADER}First we need your approval to update ...${C_END}"
-
     echo '$ apt-get -y -qq update && apt-get -y -qq upgrade'
-
     echo -e "${C_BOLD_HEADER}... and to install these required dependencies:${C_END}"
-
     echo '$ apt-get -y -qq install python3 python3-pip'
-
     echo '$ pip3 -qq install click ruamel.yaml schema progressbar'
-
     echo -e "${C_BOLD_HEADER}Then we will perform your setup instructions.${C_END}"
 
     ask_continue
 
     # Update and install requirements
-
     echo -e "${C_BOLD_HEADER}This may take some time. Please wait.${C_END}"
 
     apt-get -y -qq update && apt-get -y -qq upgrade
-
     apt-get -y -qq install python3 python3-pip
-
     pip3 -qq install click ruamel.yaml schema progressbar
 
     echo -e "${C_BOLD_SUCCESS}✓ Requirements installed!${C_END}"
@@ -55,8 +48,6 @@ fi
 # Check for requirements
 check_command='import click, ruamel.yaml, schema, progressbar'
 
-echo -e "${C_BOLD_SUCCESS}🚀 Hey ${SUDO_USER}, let's setup your system!${C_END}"
-
 if ! python3 -c "${check_command}" &> /dev/null; then
     request_install_dependencies
 fi
@@ -66,5 +57,3 @@ fi
 u="$SUDO_USER"; if [ -z "$u" ]; then u="$USER"; fi
 
 sudo -E -u "$u" python3 ${DIR}/main.py $@
-
-echo -e "${C_BOLD_SUCCESS}✓ Setup completed. Have fun!${C_END}"

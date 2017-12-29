@@ -3,21 +3,26 @@
 from . import termcol
 
 
-def _print_colorized(*values, color, sep: str=' ', end: str='\n'):
-    print(color + sep.join(values), termcol.COLORS.ENDC, sep='', end=end)
+def header(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.header(sep.join(values), bold=bold, underline=underline), end=end)
 
 
-def success(*values, sep: str=' ', end: str='\n'):
-    _print_colorized(*values, color=termcol.COLORS.SUCCESS, sep=sep, end=end)
+def information(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.information(sep.join(values), bold=bold, underline=underline), end=end)
 
 
-def header(*values, sep: str=' ', end: str='\n'):
-    _print_colorized(*values, color=termcol.COLORS.HEADER, sep=sep, end=end)
+def success(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.success(sep.join(values), bold=bold, underline=underline), end=end)
 
 
-def information(*values, sep: str=' ', end: str='\n'):
-    _print_colorized(*values, color=termcol.COLORS.INFORMATION, sep=sep, end=end)
+def warning(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.warning(sep.join(values), bold=bold, underline=underline), end=end)
 
 
-def warning(*values, sep: str=' ', end: str='\n'):
-    _print_colorized(*values, color=termcol.COLORS.WARNING, sep=sep, end=end)
+def error(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.error(sep.join(values), bold=bold, underline=underline), end=end)
+
+
+def regular(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
+    print(termcol.regular(sep.join(values), bold=bold, underline=underline), end=end)
+
