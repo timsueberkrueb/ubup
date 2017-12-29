@@ -16,16 +16,17 @@ class AbstractPlugin(abc.ABC):
     key = ''
     schema = object
 
-    def __init__(self, config=None, data_path: str=None):
+    def __init__(self, config=None, data_path: str=None, verbose: bool=False):
         """
         :param config: Plugin configuration
         :param data_path: Path to configuration folder
+        :param verbose: Whether verbose output is enabled
         """
         self.config = config
         self.data_path = data_path
+        self._verbose = verbose
 
-    @staticmethod
-    def run_command(command: str, *args):
+    def run_command(self, command: str, *args):
         """
         Run a command
         :param command: Command to run
@@ -43,20 +44,22 @@ class AbstractPlugin(abc.ABC):
         output = cmd_str + '\n'
         for line in iter(p.stdout.readline, ''):
             output += line.strip() + '\n'
+            if self._verbose:
+                print(line.strip())
         p.stdout.close()
         return_code = p.wait()
         if return_code:
-            print(output)
+            if not self._verbose:
+                print(output)
             raise subprocess.CalledProcessError(return_code, cmd_str)
 
-    @staticmethod
-    def run_command_sudo(command: str, *args):
+    def run_command_sudo(self, command: str, *args):
         """
         Run a command with sudo
         :param command: Command to run
         :param args: Command arguments
         """
-        AbstractPlugin.run_command('sudo', command, *args)
+        self.run_command('sudo', command, *args)
 
     @abc.abstractmethod
     def perform(self):

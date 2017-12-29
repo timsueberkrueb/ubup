@@ -43,7 +43,8 @@ def _track_progress(label: str, f: Callable):
     widgets = [termcol.COLORS.INFORMATION, label, ' ',
                progressbar.AnimatedMarker(), termcol.COLORS.ENDC]
     p = progressbar.ProgressBar(widgets=widgets,
-                                maxval=progressbar.UnknownLength)
+                                maxval=progressbar.UnknownLength,
+                                redirect_stdout=True)
     p.start()
     result = []
     thread = threading.Thread(target=_run_safe, args=(f, result))
@@ -94,11 +95,12 @@ class Setup:
 
         self._config = data
 
-    def perform(self, indent: bool=False):
+    def perform(self, indent: bool=False, verbose: bool=False):
         root = self._config['setup']
-        self._perform_node(root, indent=indent)
+        self._perform_node(root, indent=indent, verbose=verbose)
 
-    def _perform_node(self, node_content: Dict, node_name: str='', indent_level: int=-1, indent: bool=False):
+    def _perform_node(self, node_content: Dict, node_name: str='', indent_level: int=-1, indent: bool=False,
+                      verbose: bool=False):
         if node_name != '':
             log.header(('  ' * indent_level if indent else '') + '🔖{}:'.format(node_name))
         for child_key in node_content.keys():
@@ -107,21 +109,28 @@ class Setup:
                 self._perform_action(
                     child_key[1:],
                     child_value,
-                    indent_level=indent_level+1, indent=indent
+                    indent_level=indent_level+1,
+                    indent=indent,
+                    verbose=verbose
                 )
             else:
                 self._perform_node(
                     child_value,
                     node_name=child_key,
                     indent_level=indent_level+1,
-                    indent=indent
+                    indent=indent,
+                    verbose=verbose
                 )
 
-    def _perform_action(self, key: str, config: object, indent_level: int=-1, indent: bool=False):
+    def _perform_action(self, key: str, config: object, indent_level: int=-1, indent: bool=False, verbose: bool=False):
         if key not in self._plugins:
             raise SetupError('Unknown plugin key "{}"'.format(key))
         plugin_cls = self._plugins[key]
-        plugins_inst = plugin_cls(config, self._data_path)
+        plugins_inst = plugin_cls(
+            config=config,
+            data_path=self._data_path,
+            verbose=verbose
+        )
         _track_progress(('  ' * indent_level if indent else '') + '⚡{}'.format(key), plugins_inst.perform)
 
     def _load_custom_plugins(self) -> List[Type[plugins.AbstractPlugin]]:
