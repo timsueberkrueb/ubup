@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from typing import Set
+
 import os
+import re
+import glob
 import tempfile
 import schema
 
@@ -26,6 +30,40 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
             folder = self._expand_path(folder)
             if not os.path.exists(folder):
                 os.mkdir(folder)
+
+
+class PPAsPlugin(plugins.AbstractPlugin):
+    key = 'ppas'
+    schema = [str]
+    # Source: https://askubuntu.com/a/148968
+    _ppa_regex = re.compile(r'^deb http:\/\/ppa.launchpad.net\/[a-z0-9-]+\/[a-z0-9-]+')
+
+    def _get_existing_ppas(self) -> Set[str]:
+        """
+        Get a set of PPAs already active on the system
+        :return: Set of active PPAs
+        """
+        existing_ppas = set()
+        sources_lists = glob.iglob('/etc/apt/**/*.list', recursive=True)
+        for sources_list in sources_lists:
+            with open(sources_list) as file:
+                text = file.read()
+            for line in text.splitlines():
+                match = self._ppa_regex.match(line)
+                if match is not None:
+                    split_line = match.group(0).split('/')
+                    existing_ppas.add(split_line[3] + '/' + split_line[4])
+        return existing_ppas
+
+    def perform(self):
+        existing_ppas = self._get_existing_ppas()
+        any_new_ppas = False
+        for ppa in self.config:
+            if ppa not in existing_ppas:
+                any_new_ppas = True
+                self.run_command_sudo('apt-add-repository', '-y', 'ppa:' + ppa)
+        if any_new_ppas:
+            self.run_command_sudo('apt-get', 'update')
 
 
 class ScriptletPlugin(plugins.AbstractPlugin):
@@ -95,6 +133,7 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
 BUILTIN_PLUGINS = (
     AptPackagesPlugin,
     CreateFoldersPlugin,
+    PPAsPlugin,
     ScriptletPlugin,
     ScriptsPlugin,
     SnapPackagesPlugin

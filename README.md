@@ -174,6 +174,20 @@ $folders:
   # ...
 ```
 
+### ppas
+
+Add a set of PPAs unless they are already active.
+PPAs must be provided in the format `user/ppa` as opposed to `ppa:user/ppa`
+since the action name `$ppas` makes it obvious that the repository to add
+is a ppa.
+
+```yaml
+$ppas:
+  - foo/bar
+  - alexlarsson/flatpak
+  # ...
+```
+
 ### scriptlet
 
 Run an inline bash script snippet.
