@@ -63,6 +63,14 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
                     self.run_command_sudo('mkdir', '-p', folder)
 
 
+class FlatpakPackagesPlugin(plugins.AbstractPlugin):
+    key = 'flatpak-packages'
+    schema = [str]
+
+    def perform(self):
+        pass
+
+
 class PPAsPlugin(plugins.AbstractPlugin):
     key = 'ppas'
     schema = [str]
