@@ -25,26 +25,38 @@ class AbstractPlugin(abc.ABC):
         self.data_path = data_path
 
     @staticmethod
-    def run_command(command: str, *args, log_command: bool=True):
+    def run_command(command: str, *args):
         """
         Run a command
         :param command: Command to run
         :param args: Command arguments
-        :param log_command: Whether to log the command to the console
         """
-        if log_command:
-            print('$', command, *args)
-        subprocess.check_call([command, *args])
+
+        cmd_str = '$ ' + ' '.join([command, *args])
+
+        p = subprocess.Popen(
+            [command, *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True
+        )
+        output = cmd_str + '\n'
+        for line in iter(p.stdout.readline, ''):
+            output += line.strip() + '\n'
+        p.stdout.close()
+        return_code = p.wait()
+        if return_code:
+            print(output)
+            raise subprocess.CalledProcessError(return_code, cmd_str)
 
     @staticmethod
-    def run_command_sudo(command: str, *args, log_command: bool=True):
+    def run_command_sudo(command: str, *args):
         """
         Run a command with sudo
         :param command: Command to run
         :param args: Command arguments
-        :param log_command: Whether to log the command to the console
         """
-        AbstractPlugin.run_command('sudo', command, *args, log_command=log_command)
+        AbstractPlugin.run_command('sudo', command, *args)
 
     @abc.abstractmethod
     def perform(self):

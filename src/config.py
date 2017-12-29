@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Type, Dict
+from typing import List, Type, Dict, Callable
 
 import os
 import glob
 import ruamel.yaml as yaml
 import schema
+import progressbar
+import threading
+import itertools
+import time
 
 from . import builtin_plugins
 from . import plugin_support
 from . import plugins
 from . import log
+from . import termcol
 
 
 # Names that cannot be used as plugin keys
@@ -27,6 +32,38 @@ _OPTIONAL_META_SCHEMA = {
 }
 
 
+def _run_safe(f: Callable, result):
+    try:
+        f()
+    except Exception as e:
+        result += [e]
+
+
+def _track_progress(label: str, f: Callable):
+    widgets = [termcol.COLORS.INFORMATION, label, ' ',
+               progressbar.AnimatedMarker(), termcol.COLORS.ENDC]
+    p = progressbar.ProgressBar(widgets=widgets,
+                                maxval=progressbar.UnknownLength)
+    p.start()
+    result = []
+    thread = threading.Thread(target=_run_safe, args=(f, result))
+    thread.start()
+    for progress_count in itertools.count():
+        if not thread.is_alive():
+            break
+        p.update(progress_count)
+        time.sleep(0.1)
+    if len(result) > 0:
+        p.widgets = [termcol.error(label + ' ❌')]
+    else:
+        p.widgets = [termcol.success(label + ' ✓')]
+    p.update(force=True)
+    p.finish()
+    for r in result:
+        if isinstance(r, Exception):
+            raise r
+
+
 class SetupError(Exception):
     pass
 
@@ -38,7 +75,6 @@ class Setup:
         self._config = None
 
         self._action_schema = {}
-
         self._schema_root = {}
 
     def load_plugins(self):
@@ -60,10 +96,11 @@ class Setup:
 
     def perform(self):
         root = self._config['setup']
-        self._perform_node(root, node_name='ROOT')
+        self._perform_node(root)
 
     def _perform_node(self, node_content: Dict, node_name: str=''):
-        log.information('Visiting node {}'.format(node_name))  # TODO: Improve logging
+        if node_name != '':
+            log.header('🔖 Visiting {}'.format(node_name))
         for child_key in node_content.keys():
             child_value = node_content[child_key]
             if child_key.startswith('$'):
@@ -76,8 +113,7 @@ class Setup:
             raise SetupError('Unknown plugin key "{}"'.format(key))
         plugin_cls = self._plugins[key]
         plugins_inst = plugin_cls(config, self._data_path)
-        log.information('Performing plugin {}'.format(key))  # TODO: Improve logging
-        plugins_inst.perform()
+        _track_progress('⚡ Performing {}'.format(key), plugins_inst.perform)
 
     def _load_custom_plugins(self) -> List[Type[plugins.AbstractPlugin]]:
         plugins_list = []
