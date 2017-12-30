@@ -36,7 +36,7 @@ class PPAsPlugin(plugins.AbstractPlugin):
     key = 'ppas'
     schema = [str]
     # Source: https://askubuntu.com/a/148968
-    _ppa_regex = re.compile(r'^deb http:\/\/ppa.launchpad.net\/[a-z0-9-]+\/[a-z0-9-]+')
+    _ppa_regex = re.compile(r'^deb http://ppa.launchpad.net/[a-z0-9-]+/[a-z0-9-]+')
 
     def _get_existing_ppas(self) -> Set[str]:
         """
