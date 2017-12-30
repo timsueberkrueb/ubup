@@ -65,10 +65,54 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
 
 class FlatpakPackagesPlugin(plugins.AbstractPlugin):
     key = 'flatpak-packages'
-    schema = [str]
+    schema = [
+        str,
+        {
+            schema.Or('bundle', 'from'): str,
+            schema.Optional('installation-type'): schema.Or('system', 'user'),
+            schema.Optional('runtime'): str,
+        }
+    ]
+
+    def _check_is_flatpak_installed(self) -> bool:
+        try:
+            self.run_command('flatpak', '--version')
+            return True
+        except FileNotFoundError:
+            return False
 
     def perform(self):
-        pass
+        # Install flatpak if not already installed
+        if not self._check_is_flatpak_installed():
+            # Adding this PPA is actually the officially recommended
+            # method for installing Flatpak on Ubuntu (as of 2017-12-30).
+            # Source: https://flatpak.org/getting
+            ppa_plg = PPAsPlugin(config=['alexlarsson/flatpak'],
+                                 verbose=self._verbose)
+            ppa_plg.perform()
+            self.run_command_sudo('apt', 'install', '-y', 'flatpak')
+        assert self._check_is_flatpak_installed()
+        for flatpak in self.config:
+            if isinstance(flatpak, dict):
+                cmd = ['flatpak', 'install', '-y']
+                inst_type = 'system'
+                if 'installation-type' in flatpak:
+                    inst_type = flatpak['installation-type']
+                if inst_type == 'system':
+                    cmd += ['--system']
+                elif inst_type == 'user':
+                    cmd += ['--user']
+                if 'runtime' in flatpak:
+                    cmd += ['--runtime', flatpak['runtime']]
+                cmd += [flatpak['bundle']]
+                if inst_type == 'system':
+                    self.run_command_sudo(*cmd)
+                else:
+                    self.run_command(*cmd)
+            else:
+                self.run_command_sudo('flatpak', 'install', '-y', flatpak)
+        # NOTE: Flatpak considers it to be an error to install
+        # an already installed application.
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
@@ -173,6 +217,7 @@ BUILTIN_PLUGINS = (
     AptPackagesPlugin,
     CopyPlugin,
     CreateFoldersPlugin,
+    FlatpakPackagesPlugin,
     PPAsPlugin,
     ScriptletPlugin,
     ScriptsPlugin,
