@@ -112,7 +112,7 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
             # it is not guaranteed what concrete subclass
             # that will be. Currently, CommentedMap from ruamel.yaml
             # is used, but this may change in the future!
-            if issubclass(type(package), dict):
+            if isinstance(package, dict):
                 for package_name in package.keys():
                     options = package[package_name]
                     cmd = ['snap', 'install']
