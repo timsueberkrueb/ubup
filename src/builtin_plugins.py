@@ -5,6 +5,7 @@ from typing import Set
 import os
 import re
 import glob
+import shutil
 import tempfile
 import schema
 
@@ -18,6 +19,33 @@ class AptPackagesPlugin(plugins.AbstractPlugin):
     def perform(self):
         packages = self.config
         self.run_command_sudo('apt-get', '-y', '-q', 'install', *packages)
+
+
+class CopyPlugin(plugins.AbstractPlugin):
+    key = 'copy'
+    schema = {str: str}
+
+    def perform(self):
+        for src, dst in self.config.items():
+            src = self._expand_path(src)
+            dst = self._expand_path(dst)
+            sources = glob.glob(src)
+            for current_source in sources:
+                try:
+                    if os.path.isfile(current_source):
+                        try:
+                            shutil.copy2(current_source, dst)
+                        except PermissionError:
+                            self.run_command_sudo('cp', '-p', current_source, dst)
+                    elif os.path.isdir(current_source):
+                        try:
+                            shutil.copytree(current_source, dst)
+                        except PermissionError:
+                            self.run_command_sudo('cp', '-rp', current_source, dst)
+                except FileExistsError as e:
+                    # Ignore already existing files or directories
+                    if self._verbose:
+                        print(e)
 
 
 class CreateFoldersPlugin(plugins.AbstractPlugin):
@@ -132,6 +160,7 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
 
 BUILTIN_PLUGINS = (
     AptPackagesPlugin,
+    CopyPlugin,
     CreateFoldersPlugin,
     PPAsPlugin,
     ScriptletPlugin,

@@ -161,6 +161,22 @@ $apt-packages:
   # ...
 ```
 
+### copy
+
+Copy files or folders. This plugin will not create missing target
+directories. Use the `folders` plugin to ensure that target directories
+exist.
+You can use `~` or `$HOME` as placeholders for the home directory
+and `$USER` as placeholder for the username of the current user.
+Relative paths are relative to the directory containing the `setup.yaml`.
+
+```yaml
+$copy:
+  source: target
+  foo/*.txt: ~/Documents
+  test.txt: /opt/foo/bar
+```
+
 ### folders
 
 Create a set of folders unless they already exist.
