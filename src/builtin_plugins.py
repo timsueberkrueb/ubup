@@ -57,7 +57,10 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
         for folder in folders:
             folder = self._expand_path(folder)
             if not os.path.exists(folder):
-                os.mkdir(folder)
+                try:
+                    os.makedirs(folder, exist_ok=True)
+                except PermissionError:
+                    self.run_command_sudo('mkdir', '-p', folder)
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
