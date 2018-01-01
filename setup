@@ -25,7 +25,7 @@ function request_install_dependencies() {
     echo '$ apt-get -y -qq update && apt-get -y -qq upgrade'
     echo -e "${C_BOLD_HEADER}... and to install these required dependencies:${C_END}"
     echo '$ apt-get -y -qq install python3 python3-pip'
-    echo '$ pip3 -qq install click ruamel.yaml schema progressbar'
+    echo '$ pip3 -qq install click ruamel.yaml schema progressbar2'
     echo -e "${C_BOLD_HEADER}Then we will perform your setup instructions.${C_END}"
 
     ask_continue
@@ -35,7 +35,7 @@ function request_install_dependencies() {
 
     apt-get -y -qq update && apt-get -y -qq upgrade
     apt-get -y -qq install python3 python3-pip
-    pip3 -qq install click ruamel.yaml schema progressbar
+    pip3 -qq install click ruamel.yaml schema progressbar2
 
     echo -e "${C_BOLD_SUCCESS}✓ Requirements installed!${C_END}"
 }
