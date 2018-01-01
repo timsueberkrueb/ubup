@@ -105,3 +105,11 @@ venv.bak/
 
 # JetBrains IDEs project settings
 .idea/
+
+# Snapcraft
+.snapcraft/
+parts/
+prime/
+stage/
+*.snap
+*source.tar.bz2

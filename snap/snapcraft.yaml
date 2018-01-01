@@ -1,0 +1,33 @@
+name: ubup
+version: git
+summary: Ubuntu setup utility.
+description: |
+  Automate the steps you run after installing Ubuntu in a declarative way.
+
+grade: devel
+confinement: classic
+
+apps:
+  ubup:
+    command: app/launcher
+
+parts:
+  ubup:
+    plugin: dump
+    organize:
+      snap-launcher.sh: app/launcher
+      main.py: app/main.py
+      src/: app/src/
+    install: |
+      mkdir $SNAPCRAFT_PART_INSTALL/app/
+    stage:
+      - app/
+    after: [python]
+  python:
+    plugin: python
+    python-version: python3
+    python-packages:
+      - click
+      - ruamel.yaml
+      - schema
+      - progressbar2
