@@ -4,7 +4,7 @@ ubup
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub release](https://img.shields.io/github/release/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/releases)
 [![GitHub issues](https://img.shields.io/github/issues/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/issues)
-[![Maintained](https://img.shields.io/maintenance/yes/2017.svg)](https://github.com/tim-sueberkrueb/ubup/commits/develop)
+[![Maintained](https://img.shields.io/maintenance/yes/2018.svg)](https://github.com/tim-sueberkrueb/ubup/commits/develop)
 
 🚀 **Ub**untu set**up** utility.
 
