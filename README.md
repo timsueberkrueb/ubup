@@ -266,11 +266,11 @@ provide a dictionary with additional options:
 ```yaml
 $snap-packages:
   - foo
-  - bar:
-      classic: true
-      channel: latest/stable
-      jailmode: false
-      devmode: false
+  - package: bar
+    classic: true
+    channel: latest/stable
+    jailmode: false
+    devmode: false
 ```
 
 ---
