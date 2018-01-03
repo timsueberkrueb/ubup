@@ -177,6 +177,30 @@ $copy:
   test.txt: /opt/foo/bar
 ```
 
+### flatpak-packages
+
+Install a set of `Flatpak` packages.
+
+The list may contain the following types of elements:
+ - `.flatpakref` filename or url
+ - `.flatpak` filename or url
+ - A directory for more options:
+   - `from: <.flatpakref url or filename>`
+     **or** `bundle: <.flatpak url or filename>` (required)
+   - `target: <system|user>`: Whether to install the flatpak for the
+     current user or system-wide (optional, default is `system`)
+   - `runtime: <str>`: Look for a runtime with the specified name
+     (optional)
+
+```yaml
+$flatpak-packages:
+   - foo.flatpak
+   - bar.flatpakref
+   - https://example.com/foo.flatpakref
+   - from: https://example.com/bar.flatpakref
+     target: user
+```
+
 ### folders
 
 Create a set of folders unless they already exist.
