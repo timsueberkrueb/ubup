@@ -8,6 +8,9 @@ import glob
 import shutil
 import tempfile
 import schema
+import shutil
+import urllib.parse
+import urllib.request
 
 from . import plugins
 
@@ -74,12 +77,52 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
         }
     ]
 
+    @staticmethod
+    def _download_flatpakref(url: str) -> str:
+        file = tempfile.NamedTemporaryFile('wb', prefix='download_',
+                                           suffix='.flatpakref', delete=False)
+        with urllib.request.urlopen(url) as response, open(file.name, 'wb') as out_file:
+            shutil.copyfileobj(response, out_file)
+
+        return file.name
+
+    @staticmethod
+    def _get_flatpakref_application_name(filepath: str) -> str:
+        with open(filepath) as file:
+            text = file.read()
+            for line in text.splitlines():
+                if line.startswith('Name='):
+                    return line.split('=')[1].strip()
+        raise Exception('Error parsing flatpakref file: {}'.format(filepath))
+
     def _check_is_flatpak_installed(self) -> bool:
         try:
             self.run_command('flatpak', '--version')
             return True
         except FileNotFoundError:
             return False
+
+    def _check_is_application_installed(self, name: str) -> bool:
+        output = self.run_command('flatpak', 'list')
+        return output.find(name) != -1
+
+    def _install_flatpak(self, bundle_or_ref: str, runtime: str=None, target: str='system'):
+        # Flatpak considers it an error to install already
+        # installed applications
+        # Workaround by using "--reinstall" which uninstalls
+        # the application first if it is already installed.
+        cmd = ['flatpak', 'install', '--reinstall', '-y']
+        if target == 'user':
+            cmd += ['--user']
+        else:
+            cmd += ['--system']
+        if runtime is not None:
+            cmd += ['--runtime', runtime]
+        cmd += [bundle_or_ref]
+        if target == 'system':
+            self.run_command_sudo(*cmd)
+        else:
+            self.run_command(*cmd)
 
     def perform(self):
         # Install flatpak if not already installed
@@ -93,26 +136,41 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
             self.run_command_sudo('apt', 'install', '-y', 'flatpak')
         assert self._check_is_flatpak_installed()
         for flatpak in self.config:
+            target = 'system'
+            runtime = None
+            bundle = None
+            ref = None
             if isinstance(flatpak, dict):
-                cmd = ['flatpak', 'install', '-y']
-                inst_type = 'system'
                 if 'target' in flatpak:
-                    inst_type = flatpak['target']
-                if inst_type == 'system':
-                    cmd += ['--system']
-                elif inst_type == 'user':
-                    cmd += ['--user']
+                    target = flatpak['target']
                 if 'runtime' in flatpak:
-                    cmd += ['--runtime', flatpak['runtime']]
-                cmd += [flatpak['bundle']]
-                if inst_type == 'system':
-                    self.run_command_sudo(*cmd)
-                else:
-                    self.run_command(*cmd)
+                    runtime = flatpak['runtime']
+                if 'bundle' in flatpak:
+                    bundle = flatpak['bundle']
+                if 'from' in flatpak:
+                    ref = flatpak['from']
             else:
-                self.run_command_sudo('flatpak', 'install', '-y', flatpak)
-        # NOTE: Flatpak considers it to be an error to install
-        # an already installed application.
+                if flatpak[flatpak.rfind('.')+1:] == 'flatpakref':
+                    ref = flatpak
+                else:
+                    bundle = flatpak
+            # Install a .flatpakref
+            # Will only perform the installation if the application
+            # is not already installed
+            if ref is not None:
+                # Check if the .flatpakref is remote
+                remote = bool(urllib.parse.urlparse(ref).scheme)
+                filepath = self._download_flatpakref(ref) if remote else ref
+                app_name = self._get_flatpakref_application_name(filepath)
+                if self._check_is_application_installed(app_name):
+                    continue
+                self._install_flatpak(filepath, runtime, target)
+            # Install a .flatpak
+            # NOTE: Doesn't check whether the application is
+            # already installed or not. Will perform a reinstall
+            # if the application is already installed.
+            else:
+                self._install_flatpak(bundle, runtime, target)
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
