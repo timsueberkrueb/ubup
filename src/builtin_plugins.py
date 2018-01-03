@@ -236,12 +236,11 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
     schema = [
         str,
         {
-            str: {
-                schema.Optional('channel'): str,
-                schema.Optional('classic'): bool,
-                schema.Optional('devmode'): bool,
-                schema.Optional('jailmode'): bool,
-            }
+            'package': str,
+            schema.Optional('channel'): str,
+            schema.Optional('classic'): bool,
+            schema.Optional('devmode'): bool,
+            schema.Optional('jailmode'): bool,
         },
     ]
 
@@ -254,19 +253,18 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
             # that will be. Currently, CommentedMap from ruamel.yaml
             # is used, but this may change in the future!
             if isinstance(package, dict):
-                for package_name in package.keys():
-                    options = package[package_name]
-                    cmd = ['snap', 'install']
-                    if 'channel' in options:
-                        cmd += ['--channel', options['channel']]
-                    if 'classic' in options and options['classic']:
-                        cmd += ['--classic']
-                    if 'devmode' in options and options['devmode']:
-                        cmd += ['--devmode']
-                    if 'jailmode' in options and options['jailmode']:
-                        cmd += ['--jailmode']
-                    cmd += [package_name]
-                    self.run_command_sudo(*cmd)
+                package_name = package['package']
+                cmd = ['snap', 'install']
+                if 'channel' in package:
+                    cmd += ['--channel', package['channel']]
+                if 'classic' in package and package['classic']:
+                    cmd += ['--classic']
+                if 'devmode' in package and package['devmode']:
+                    cmd += ['--devmode']
+                if 'jailmode' in package and package['jailmode']:
+                    cmd += ['--jailmode']
+                cmd += [package_name]
+                self.run_command_sudo(*cmd)
             else:
                 self.run_command_sudo('snap', 'install', package)
 

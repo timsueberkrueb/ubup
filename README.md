@@ -254,18 +254,14 @@ $scripts:
 Install a set of snap packages.
 
 You can either just define the names of the packages to install or
-provide a dictionary with additional options in the following schema:
-```
-<snap-package>:
-    <option-key>: <option-value>
-```
+provide a dictionary with additional options:
 
-The following options are supported:
-
-* `classic: <true|false>`: Toggle classic [confinement](https://docs.snapcraft.io/reference/confinement)
-* `channel: <track>/<risk level>/<branch>`: [Snap channel](https://docs.snapcraft.io/reference/channels)
+* `package: <str>`: Name of the package to install (required)
+* `classic: <true|false>`: Toggle classic [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
+* `channel: <track>/<risk level>/<branch>`: [Snap channel](https://docs.snapcraft.io/reference/channels) (optional)
 * `jailmode <true|false>`: Toggle enforcement of strict [confinement](https://docs.snapcraft.io/reference/confinement)
-* `devmode <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement)
+  (optional)
+* `devmode <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
 
 ```yaml
 $snap-packages:
