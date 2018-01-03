@@ -69,7 +69,7 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
         str,
         {
             schema.Or('bundle', 'from'): str,
-            schema.Optional('installation-type'): schema.Or('system', 'user'),
+            schema.Optional('target'): schema.Or('system', 'user'),
             schema.Optional('runtime'): str,
         }
     ]
@@ -96,8 +96,8 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
             if isinstance(flatpak, dict):
                 cmd = ['flatpak', 'install', '-y']
                 inst_type = 'system'
-                if 'installation-type' in flatpak:
-                    inst_type = flatpak['installation-type']
+                if 'target' in flatpak:
+                    inst_type = flatpak['target']
                 if inst_type == 'system':
                     cmd += ['--system']
                 elif inst_type == 'user':
