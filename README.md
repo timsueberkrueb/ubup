@@ -187,18 +187,27 @@ The list may contain the following types of elements:
 * A directory for more options:
   * `from: <.flatpakref url or filename>`
     **or** `bundle: <.flatpak url or filename>` (required)
+  * `remote: <str>`: The remote repository to look for the app or runtime (optional)
   * `target: <system|user>`: Whether to install the flatpak for the
     current user or system-wide (optional, default is `system`)
-  * `type: <app|runtime>`: Whether to look for an app or runtime
-    (optional)
+  * `type: <ref|bundle|app|runtime>`: Whether to look for an app, runtime,
+    bundle or ref (optional)
+    * `ref`: look for a `.flatpakref` file
+    * `bundle`: look for a `.flatpak` bundle
+    * `app`: look for an app with the given name in a `remote` repository
+    * `runtime`: look for a runtime with the given name in a `remote` repository
 
 ```yaml
 $flatpak-packages:
    - foo.flatpak
    - bar.flatpakref
    - https://example.com/foo.flatpakref
-   - from: https://example.com/bar.flatpakref
+   - package: https://example.com/bar.flatpakref
+     type: ref
      target: user
+   - package: org.freedesktop.Platform
+     remote: flathub
+     type: runtime
 ```
 
 ### folders
