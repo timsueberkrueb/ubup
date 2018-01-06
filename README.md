@@ -179,7 +179,7 @@ $copy:
 
 ### flatpak-packages
 
-Install a set of `Flatpak` packages.
+Install a set of Flatpak packages.
 
 The list may contain the following types of elements:
 * `.flatpakref` filename or url
@@ -199,16 +199,33 @@ The list may contain the following types of elements:
 
 ```yaml
 $flatpak-packages:
-   - foo.flatpak
-   - bar.flatpakref
-   - https://example.com/foo.flatpakref
-   - package: https://example.com/bar.flatpakref
-     type: ref
-     target: user
-   - package: org.freedesktop.Platform
-     remote: flathub
-     type: runtime
+  - foo.flatpak
+  - bar.flatpakref
+  - https://example.com/foo.flatpakref
+  - package: https://example.com/bar.flatpakref
+    type: ref
+    target: user
+  - package: org.freedesktop.Platform
+    remote: flathub
+    type: runtime
 ```
+
+### flatpak-repositories
+
+Add a set of remote Flatpak repositories.
+Each repository is defined as a dictionary with the following keys:
+* `name: <str>`: The local name of the repository (required)
+* `location: <str>`: Url to a remote `.flatpakrepo` (required)
+* `target: <system|user>`: Whether to install the repository for the
+  current user or system-wide (optional, default is `system`)
+
+```yaml
+$flatpak-repositories:
+  - name: flathub
+    location: https://flathub.org/repo/flathub.flatpakrepo
+    target: system
+```
+
 
 ### folders
 

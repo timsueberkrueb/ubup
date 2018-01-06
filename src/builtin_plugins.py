@@ -2,10 +2,10 @@
 
 from typing import Set
 
+import abc
 import os
 import re
 import glob
-import shutil
 import tempfile
 import schema
 import shutil
@@ -13,6 +13,28 @@ import urllib.parse
 import urllib.request
 
 from . import plugins
+
+
+class _AbstractFlatpakPlugin(plugins.AbstractPlugin):
+    def _check_is_flatpak_installed(self) -> bool:
+        try:
+            self.run_command('flatpak', '--version')
+            return True
+        except FileNotFoundError:
+            return False
+
+    def _install_flatpak(self):
+        # Adding this PPA is actually the officially recommended
+        # method for installing Flatpak on Ubuntu (as of 2017-12-30).
+        # Source: https://flatpak.org/getting
+        ppa_plg = PPAsPlugin(config=['alexlarsson/flatpak'],
+                             verbose=self._verbose)
+        ppa_plg.perform()
+        self.run_command_sudo('apt', 'install', '-y', 'flatpak')
+
+    @abc.abstractmethod
+    def perform(self):
+        pass
 
 
 class AptPackagesPlugin(plugins.AbstractPlugin):
@@ -66,7 +88,7 @@ class CreateFoldersPlugin(plugins.AbstractPlugin):
                     self.run_command_sudo('mkdir', '-p', folder)
 
 
-class FlatpakPackagesPlugin(plugins.AbstractPlugin):
+class FlatpakPackagesPlugin(_AbstractFlatpakPlugin):
     key = 'flatpak-packages'
     schema = [
         str,
@@ -96,18 +118,11 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
                     return line.split('=')[1].strip()
         raise Exception('Error parsing flatpakref file: {}'.format(filepath))
 
-    def _check_is_flatpak_installed(self) -> bool:
-        try:
-            self.run_command('flatpak', '--version')
-            return True
-        except FileNotFoundError:
-            return False
-
     def _check_is_application_installed(self, name: str) -> bool:
         output = self.run_command('flatpak', 'list')
         return output.find(name) != -1
 
-    def _install_flatpak(self, app: str, remote: str=None, type_: str=None, target: str='system'):
+    def _install_flatpak_package(self, app: str, remote: str=None, type_: str=None, target: str='system'):
         # Flatpak considers it an error to install already
         # installed applications
         # Workaround by using "--reinstall" which uninstalls
@@ -139,13 +154,7 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
     def perform(self):
         # Install flatpak if not already installed
         if not self._check_is_flatpak_installed():
-            # Adding this PPA is actually the officially recommended
-            # method for installing Flatpak on Ubuntu (as of 2017-12-30).
-            # Source: https://flatpak.org/getting
-            ppa_plg = PPAsPlugin(config=['alexlarsson/flatpak'],
-                                 verbose=self._verbose)
-            ppa_plg.perform()
-            self.run_command_sudo('apt', 'install', '-y', 'flatpak')
+            self._install_flatpak()
 
         assert self._check_is_flatpak_installed()
 
@@ -199,7 +208,44 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
             # NOTE: Doesn't check whether the application is
             # already installed or not. Will perform a reinstall
             # if the application is already installed.
-            self._install_flatpak(package, remote, type_, target)
+            self._install_flatpak_package(package, remote, type_, target)
+
+
+class FlatpakRepositoriesPlugin(_AbstractFlatpakPlugin):
+    key = 'flatpak-repositories'
+    schema = [
+        {
+            'name': str,
+            'location': str,
+            schema.Optional('target'): schema.Or('user', 'system'),
+        }
+    ]
+
+    def perform(self):
+        # Install flatpak if not already installed
+        if not self._check_is_flatpak_installed():
+            self._install_flatpak()
+
+        assert self._check_is_flatpak_installed()
+
+        for repo in self.config:
+            cmd = ['flatpak', 'remote-add', '--if-not-exists']
+            target = 'system'
+
+            if 'target' in repo:
+                target = repo['target']
+
+            if target == 'user':
+                cmd += ['--user']
+            elif target == 'system':
+                cmd += ['--system']
+
+            cmd += [repo['name'], repo['location']]
+
+            if target == 'system':
+                self.run_command_sudo(*cmd)
+            else:
+                self.run_command(*cmd)
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
@@ -303,6 +349,7 @@ BUILTIN_PLUGINS = (
     CopyPlugin,
     CreateFoldersPlugin,
     FlatpakPackagesPlugin,
+    FlatpakRepositoriesPlugin,
     PPAsPlugin,
     ScriptletPlugin,
     ScriptsPlugin,
