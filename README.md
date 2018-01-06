@@ -189,7 +189,7 @@ The list may contain the following types of elements:
     **or** `bundle: <.flatpak url or filename>` (required)
   * `target: <system|user>`: Whether to install the flatpak for the
     current user or system-wide (optional, default is `system`)
-  * `runtime: <str>`: Look for a runtime with the specified name
+  * `type: <app|runtime>`: Whether to look for an app or runtime
     (optional)
 
 ```yaml

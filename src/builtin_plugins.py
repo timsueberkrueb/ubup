@@ -73,7 +73,7 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
         {
             schema.Or('bundle', 'from'): str,
             schema.Optional('target'): schema.Or('system', 'user'),
-            schema.Optional('runtime'): str,
+            schema.Optional('type'): schema.Or('app', 'runtime'),
         }
     ]
 
@@ -106,7 +106,7 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
         output = self.run_command('flatpak', 'list')
         return output.find(name) != -1
 
-    def _install_flatpak(self, bundle_or_ref: str, runtime: str=None, target: str='system'):
+    def _install_flatpak(self, bundle_or_ref: str, type_: str=None, target: str='system'):
         # Flatpak considers it an error to install already
         # installed applications
         # Workaround by using "--reinstall" which uninstalls
@@ -116,8 +116,11 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
             cmd += ['--user']
         else:
             cmd += ['--system']
-        if runtime is not None:
-            cmd += ['--runtime', runtime]
+        if type_ is not None:
+            if type == 'runtime':
+                cmd += ['--runtime']
+            elif type == 'app':
+                cmd += ['--app']
         cmd += [bundle_or_ref]
         if target == 'system':
             self.run_command_sudo(*cmd)
@@ -137,14 +140,14 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
         assert self._check_is_flatpak_installed()
         for flatpak in self.config:
             target = 'system'
-            runtime = None
+            type_ = None
             bundle = None
             ref = None
             if isinstance(flatpak, dict):
                 if 'target' in flatpak:
                     target = flatpak['target']
-                if 'runtime' in flatpak:
-                    runtime = flatpak['runtime']
+                if 'type' in flatpak:
+                    type_ = flatpak['type']
                 if 'bundle' in flatpak:
                     bundle = flatpak['bundle']
                 if 'from' in flatpak:
@@ -164,13 +167,13 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
                 app_name = self._get_flatpakref_application_name(filepath)
                 if self._check_is_application_installed(app_name):
                     continue
-                self._install_flatpak(filepath, runtime, target)
+                self._install_flatpak(filepath, type_, target)
             # Install a .flatpak
             # NOTE: Doesn't check whether the application is
             # already installed or not. Will perform a reinstall
             # if the application is already installed.
             else:
-                self._install_flatpak(bundle, runtime, target)
+                self._install_flatpak(bundle, type_, target)
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
