@@ -79,9 +79,9 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
     ]
 
     @staticmethod
-    def _download_flatpakref(url: str) -> str:
+    def _download_package(url: str, suffix: str='.flatpakref') -> str:
         file = tempfile.NamedTemporaryFile('wb', prefix='download_',
-                                           suffix='.flatpakref', delete=False)
+                                           suffix=suffix, delete=False)
         with urllib.request.urlopen(url) as response, open(file.name, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
 
@@ -146,11 +146,14 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
                                  verbose=self._verbose)
             ppa_plg.perform()
             self.run_command_sudo('apt', 'install', '-y', 'flatpak')
+
         assert self._check_is_flatpak_installed()
+
         for flatpak in self.config:
             target = 'system'
             type_ = None
             remote = None
+
             if isinstance(flatpak, dict):
                 package = flatpak['package']
                 if 'target' in flatpak:
@@ -161,6 +164,7 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
                     remote = flatpak['remote']
             else:
                 package = flatpak
+
             # Determine type based on package argument
             if type_ is None:
                 if package[package.rfind('.')+1:] == 'flatpakref':
@@ -169,24 +173,33 @@ class FlatpakPackagesPlugin(plugins.AbstractPlugin):
                     type_ = 'bundle'
                 else:
                     type_ = 'app'
-            # Install a .flatpakref
-            # Will only perform the installation if the application
-            # is not already installed
+
+            # Download remote bundles or refs
+            # This is required for bundles because it is not currently supported
+            # by Flatpak to download remote .flatpak bundles. We also download
+            # remote .flatpakref files to check whether the application is already
+            # installed before attempting an installation.
+            if type_ in ('ref', 'bundle'):
+                is_remote_package = bool(urllib.parse.urlparse(package).scheme)
+                if is_remote_package:
+                    package = self._download_package(package, suffix='.flatpakref' if type_ == 'ref' else '.flatpak')
+                else:
+                    # Consider the package to be a local file,
+                    # therefore expand the path:
+                    package = self._expand_path(package)
+
+            # In case of .flatpakref files, we will only perform
+            # the installation if the application is not already installed
             if type_ == 'ref':
                 # Check if the .flatpakref is remote
-                is_remote_ref = bool(urllib.parse.urlparse(package).scheme)
-                filepath = self._download_flatpakref(package) if is_remote_ref else package
-                app_name = self._get_flatpakref_application_name(filepath)
+                app_name = self._get_flatpakref_application_name(package)
                 if self._check_is_application_installed(app_name):
                     continue
-                self._install_flatpak(filepath, remote, type_, target)
-            # Install either a .flatpak bundle or an app or runtime
-            # from a remote repository
+
             # NOTE: Doesn't check whether the application is
             # already installed or not. Will perform a reinstall
             # if the application is already installed.
-            else:
-                self._install_flatpak(package, remote, type_, target)
+            self._install_flatpak(package, remote, type_, target)
 
 
 class PPAsPlugin(plugins.AbstractPlugin):
