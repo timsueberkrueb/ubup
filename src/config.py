@@ -87,6 +87,9 @@ class Setup:
             y = yaml.YAML()
             data = y.load(file)
 
+        if data is None:
+            raise SetupError('No setup configuration found in {}.'.format(filename))
+
         # Support minimal schema without metadata
         if 'setup' not in data:
             data = {'setup': data}
