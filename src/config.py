@@ -70,7 +70,7 @@ class SetupError(Exception):
 
 
 class Setup:
-    def __init__(self, data_path: str):
+    def __init__(self, data_path: str=None):
         self._data_path = data_path
         self._plugins = {}
         self._config = None
@@ -79,10 +79,13 @@ class Setup:
         self._schema_root = {}
 
     def load_plugins(self):
-        custom_plugins = self._load_custom_plugins()
+        if self._data_path is not None:
+            custom_plugins = self._load_custom_plugins()
+        else:
+            custom_plugins = []
         self._set_plugins(list(builtin_plugins.BUILTIN_PLUGINS) + custom_plugins)
 
-    def load_config(self, filename: str):
+    def load_config_file(self, filename: str):
         with open(filename) as file:
             y = yaml.YAML()
             data = y.load(file)
@@ -90,6 +93,18 @@ class Setup:
         if data is None:
             raise SetupError('No setup configuration found in {}.'.format(filename))
 
+        self.load_config(data)
+
+    def load_config_str(self, config: str):
+        y = yaml.YAML()
+        data = y.load(config)
+
+        if data is None:
+            raise SetupError('Trying to load empty configuration.')
+
+        self.load_config(data)
+
+    def load_config(self, data: Dict):
         # Support minimal schema without metadata
         if 'setup' not in data:
             data = {'setup': data}

@@ -35,7 +35,7 @@ def main(config_path: str, no_roots: bool=False, verbose: bool=False):
 
     setup = config.Setup(config_dir)
     setup.load_plugins()
-    setup.load_config(setup_filename)
+    setup.load_config_file(setup_filename)
 
     setup.perform(indent=not (no_roots or verbose), verbose=verbose)
 
