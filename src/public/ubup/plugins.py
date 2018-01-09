@@ -26,11 +26,12 @@ class AbstractPlugin(abc.ABC):
         self.data_path = data_path
         self._verbose = verbose
 
-    def run_command(self, command: str, *args) -> str:
+    def run_command(self, command: str, *args, cwd: str=None) -> str:
         """
         Run a command
         :param command: Command to run
         :param args: Command arguments
+        :param cwd: Current working directory
         :return: Command output
         """
 
@@ -40,7 +41,8 @@ class AbstractPlugin(abc.ABC):
             [command, *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True
+            universal_newlines=True,
+            cwd=cwd or self.data_path
         )
         output = ''
         for line in iter(p.stdout.readline, ''):
@@ -55,14 +57,15 @@ class AbstractPlugin(abc.ABC):
             raise subprocess.CalledProcessError(return_code, cmd_str)
         return output
 
-    def run_command_sudo(self, command: str, *args) -> str:
+    def run_command_sudo(self, command: str, *args, cwd: str=None) -> str:
         """
         Run a command with sudo
         :param command: Command to run
         :param args: Command arguments
+        :param cwd: Current working directory
         :return: Command output
         """
-        return self.run_command('sudo', command, *args)
+        return self.run_command('sudo', command, *args, cwd=cwd)
 
     @abc.abstractmethod
     def perform(self):
