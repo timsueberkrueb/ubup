@@ -352,7 +352,7 @@ class HelloPlugin(AbstractPlugin):
     schema = str
 
     def perform(self):
-        print(f"Hello {self.config}!")
+        print("Hello {}!".format(self.config))
 
 ```
 
