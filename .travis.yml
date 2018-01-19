@@ -1,11 +1,11 @@
 sudo: required
 dist: trusty
+services:
+  - docker
 language: python
 python:
   - "3.5"
-  - "3.6"
 install:
-  - sudo apt-get -y install snapd
-  - pip install click ruamel.yaml schema progressbar2
+  - pip install click
 script:
-  - python3 ./tests/run_tests.py --perform-on-host
+  - python3 ./tests/run_tests.py --build-docker-images --docker --verbose
