@@ -19,8 +19,8 @@ SUPPORTED_UBUNTU_RELEASES = (
 )
 
 
-_HYPERVISOR_MISSING_MESSAGE = '''LXD or Docker are required in order to run tests without polluting the host system.
-Switch between hypervisors using the --docker or --lxd command line options.
+_CONTAINER_ENGINE_MISSING_MESSAGE = '''LXD or Docker are required in order to run tests without polluting the host system.
+Switch between container engines using the --docker or --lxd command line options.
 Install LXD it by running:
 $ snap install lxd
 and set it up by running:
@@ -35,7 +35,7 @@ def _check_is_lxd_installed():
         subprocess.check_call(['lxd', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
         raise click.ClickException('LXD doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _HYPERVISOR_MISSING_MESSAGE)
+                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
 
 
 def _check_is_docker_installed():
@@ -43,7 +43,7 @@ def _check_is_docker_installed():
         subprocess.check_call(['docker', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
         raise click.ClickException('Docker doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _HYPERVISOR_MISSING_MESSAGE)
+                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
 
 
 def _docker_wait_for_snapd(container_name):
@@ -197,7 +197,7 @@ def _run_on_host(verbose: bool=False):
 
 @click.command()
 @click.option('--verbose', default=False, is_flag=True, help='Enable verbose output.')
-@click.option('--docker/--lxd', default=False, is_flag=True, help='Container hypervisor to use')
+@click.option('--docker/--lxd', default=False, is_flag=True, help='Container engine to use')
 @click.option('--build-docker-images', default=False, is_flag=True, help='Build Docker images')
 @click.option('--perform-on-host', default=False, is_flag=True,
               help='Perform tests on the host rather than inside of a container. '

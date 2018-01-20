@@ -3,6 +3,7 @@ ubup
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub release](https://img.shields.io/github/release/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/releases)
+[![Build Status](https://travis-ci.org/tim-sueberkrueb/ubup.svg?branch=develop)](https://travis-ci.org/tim-sueberkrueb/ubup)
 [![GitHub issues](https://img.shields.io/github/issues/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/issues)
 [![Maintained](https://img.shields.io/maintenance/yes/2018.svg)](https://github.com/tim-sueberkrueb/ubup/commits/develop)
 
@@ -17,6 +18,8 @@ Automate the steps you run after installing Ubuntu in a declarative way.
 ## Requirements
 
 * Ubuntu 16.04 or later (Python >= 3.5)
+
+Refer to the [development guide](DEVELOPMENT.md) for more information.
 
 ## Configuration
 
