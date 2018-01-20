@@ -64,7 +64,7 @@ def _docker_wait_for_snapd(container_name):
     print('Snapd is up and running.')
 
 
-def _run_in_docker(verbose: bool=False):
+def _run_with_docker(verbose: bool=False):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
@@ -148,7 +148,7 @@ def _lxc_wait_for_network(container_name):
     print('Network connection established')
 
 
-def _run_in_lxc_container(verbose: bool=False):
+def _run_with_lxd(verbose: bool=False):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
@@ -210,10 +210,10 @@ def main(verbose: bool=False, docker: bool=False, build_docker_images: bool=Fals
         _run_on_host(verbose)
     elif docker:
         _check_is_docker_installed()
-        _run_in_docker(verbose)
+        _run_with_docker(verbose)
     else:
         _check_is_lxd_installed()
-        _run_in_lxc_container(verbose)
+        _run_with_lxd(verbose)
 
 
 if __name__ == '__main__':
