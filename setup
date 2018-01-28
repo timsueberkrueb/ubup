@@ -33,17 +33,13 @@ function request_install_dependencies() {
     # Update and install requirements
     echo -e "${C_BOLD_HEADER}This may take some time. Please wait.${C_END}"
 
-    apt-get -y -qq update && apt-get -y -qq upgrade
-    apt-get -y -qq install python3 python3-pip
-    pip3 -qq install click ruamel.yaml schema progressbar2
+    sudo apt-get -y -qq update && sudo apt-get -y -qq upgrade
+    sudo apt-get -y -qq install python3 python3-pip
+    sudo pip3 -qq install click ruamel.yaml schema progressbar2
 
     echo -e "${C_BOLD_SUCCESS}✓ Requirements installed!${C_END}"
 }
 
-# Require root access
-if [ "$UID" -ne 0 ]; then
-    exec sudo "$0" "$@"
-fi
 
 # Check for requirements
 check_command='import click, ruamel.yaml, schema, progressbar'
@@ -54,6 +50,4 @@ fi
 
 # Perform setup
 
-u="$SUDO_USER"; if [ -z "$u" ]; then u="$USER"; fi
-
-sudo -E -u "$u" python3 ${DIR}/main.py $@
+python3 ${DIR}/main.py $@

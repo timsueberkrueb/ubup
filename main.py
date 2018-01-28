@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import click
 import random
@@ -9,11 +10,29 @@ from src import config
 from src import log
 
 
+def _require_root():
+    if 'UBUP_READY_TO_LAUNCH' not in os.environ:
+        launch_env = os.environ
+        launch_env['UBUP_READY_TO_LAUNCH'] = '1'
+
+        try:
+            u = os.environ['SUDO_USER']
+        except KeyError:
+            u = os.environ['USER']
+
+        args = ['sudo', '-E', '-u', u, sys.executable] + sys.argv + [launch_env]
+
+        # Replace the current process
+        os.execlpe('sudo', *args)
+
+
 @click.command()
 @click.argument('config_path', default=os.getcwd(), type=click.Path(exists=True, resolve_path=True))
 @click.option('-v', '--verbose', default=False, is_flag=True, help='Enable verbose output. Disables tree-like output.')
 @click.option('--no-roots', default=False, is_flag=True, help='Disable tree-like progress output.')
 def main(config_path: str, no_roots: bool=False, verbose: bool=False):
+    _require_root()
+
     if os.path.isdir(config_path):
         setup_filename = os.path.join(config_path, 'setup.yaml')
     else:
