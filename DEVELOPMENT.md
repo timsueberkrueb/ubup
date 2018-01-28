@@ -58,6 +58,25 @@ at least once.
 
 See `./tests/run_tests.py --help` for more options.
 
+## Packaging
+
+We use PyInstaller to create a single-file executable of ubup.
+
+To install PyInstaller, run:
+
+```bash
+pip3 install pyinstaller
+```
+
+To create the single-file executable, run:
+
+```bash
+pyinstaller -F -n ubup main.py
+```
+
+Release packages should be build on the oldest Ubuntu version supported by ubup
+to [ensure compatibility](https://pythonhosted.org/PyInstaller/usage.html#making-linux-apps-forward-compatible).
+
 ## Contributing
 
 Contributions in form of bug reports, feature proposals or pull requests are highly
