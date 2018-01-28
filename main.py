@@ -11,16 +11,25 @@ from src import log
 
 
 def _require_root():
-    if 'UBUP_READY_TO_LAUNCH' not in os.environ:
+    root_mode = 'UBUP_STAGE_1' not in os.environ
+    user_mode = 'UBUP_STAGE_1' in os.environ \
+                and 'UBUP_STAGE_2' not in os.environ
+    if root_mode or user_mode:
         launch_env = os.environ
-        launch_env['UBUP_READY_TO_LAUNCH'] = '1'
+        if root_mode:
+            launch_env['UBUP_STAGE_1'] = '1'
+        if user_mode:
+            launch_env['UBUP_STAGE_2'] = '1'
 
         try:
             u = os.environ['SUDO_USER']
         except KeyError:
             u = os.environ['USER']
 
-        args = ['sudo', '-E', '-u', u, sys.executable]
+        args = ['sudo', '-E']
+        if user_mode:
+            args += ['-u', u]
+        args += [sys.executable]
 
         if getattr(sys, 'frozen', False):
             # Running in a bundle created by PyInstaller
