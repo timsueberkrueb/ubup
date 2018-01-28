@@ -6,6 +6,7 @@ language: python
 python:
   - "3.5"
 install:
-  - pip install click
+  - pip install click pycodestyle
 script:
   - python3 ./tests/run_tests.py --build-docker-images --docker --verbose
+  - python3 ./tests/check_code_style.py
