@@ -25,4 +25,3 @@ def error(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: boo
 
 def regular(*values, sep: str=' ', end: str='\n', bold: bool=False, underline: bool=False):
     print(termcol.regular(sep.join(values), bold=bold, underline=underline), end=end)
-

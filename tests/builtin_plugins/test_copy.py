@@ -47,4 +47,4 @@ def test_real():
         setup.load_config_str(_REAL_CONFIG)
         setup.perform()
         assert set(os.listdir(target1_dir)) == {'abc.txt', 'foo.txt', 'bar.txt'}
-        assert set(os.listdir(target2_dir)) == {'moly',}
+        assert set(os.listdir(target2_dir)) == {'moly', }
