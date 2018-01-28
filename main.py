@@ -20,7 +20,16 @@ def _require_root():
         except KeyError:
             u = os.environ['USER']
 
-        args = ['sudo', '-E', '-u', u, sys.executable] + sys.argv + [launch_env]
+        args = ['sudo', '-E', '-u', u, sys.executable]
+
+        if getattr(sys, 'frozen', False):
+            # Running in a bundle created by PyInstaller
+            # sys.executable already points to the bundle
+            args += [launch_env]
+        else:
+            # Running in live mode. sys.executable points
+            # to the Python interpreter
+            args += sys.argv + [launch_env]
 
         # Replace the current process
         os.execlpe('sudo', *args)
