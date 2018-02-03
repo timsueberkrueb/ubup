@@ -77,6 +77,13 @@ pyinstaller -F -n ubup main.py
 Release packages should be build on the oldest Ubuntu version supported by ubup
 to [ensure compatibility](https://pythonhosted.org/PyInstaller/usage.html#making-linux-apps-forward-compatible).
 
+To create a release binary in a LXC container, run:
+
+```bash
+./scripts/build_release.py <version>
+# Replace <version> with the version number (following semver)
+```
+
 ## Contributing
 
 Contributions in form of bug reports, feature proposals or pull requests are highly
