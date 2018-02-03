@@ -23,16 +23,14 @@ def check_is_docker_installed():
     try:
         subprocess.check_call(['docker', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
-        raise click.ClickException('Docker doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
+        raise click.ClickException('Docker doesn\'t seem to be installed on your system or is not in $PATH.')
 
 
 def check_is_lxd_installed():
     try:
         subprocess.check_call(['lxd', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
-        raise click.ClickException('LXD doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
+        raise click.ClickException('LXD doesn\'t seem to be installed on your system or is not in $PATH.')
 
 
 def docker_wait_for_snapd(container_name):
