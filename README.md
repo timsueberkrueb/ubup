@@ -116,7 +116,7 @@ Supported metadata keys are:
 To perform your setup, simply run
 
 ```
-./path/to/ubup/setup
+ubup
 ```
 
 in the folder that contains your `setup.yaml`.
@@ -139,9 +139,8 @@ git init
 Add the `ubup` repository as a submodule:
 
 ```
-# Note: It will be recommended to use the master branch to
+# Note: It is recommended to use the master branch to
 # ensure you run with a stable version of ubup.
-# There is no stable release and therefore no master branch, yet.
 git submodule add -b master https://github.com/tim-sueberkrueb/ubup.git
 git submodule update --init
 ```
@@ -304,7 +303,7 @@ $snap-packages:
 
 ---
 
-Looks a bit sparse? Create a pull request to add your plugin!
+Missing something? Create a pull request to add your plugin!
 
 ---
 
