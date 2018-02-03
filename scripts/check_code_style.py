@@ -6,8 +6,8 @@ import os
 import pycodestyle
 
 
-TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
-SOURCE_ROOT = os.path.dirname(TESTS_DIR)
+SOURCE_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+TESTS_DIR = os.path.join(SOURCE_ROOT, 'tests')
 
 
 def main():

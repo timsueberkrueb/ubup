@@ -9,8 +9,8 @@ import tempfile
 import click
 
 
-TESTS_DIR = os.path.abspath(os.path.dirname(__file__))
-SOURCE_ROOT = os.path.dirname(TESTS_DIR)
+SOURCE_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+TESTS_DIR = os.path.join(SOURCE_ROOT, 'tests')
 
 
 SUPPORTED_UBUNTU_RELEASES = (
@@ -68,7 +68,7 @@ def _run_with_docker(verbose: bool=False):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
-                                           '&& python3 ./tests/run_tests.py --perform-on-host'
+                                           '&& python3 ./scripts/run_tests.py --perform-on-host'
                                            + (' --verbose' if verbose else '')]
         container_name = 'ubup-tests-runner-{}'.format(release)
 
@@ -152,7 +152,7 @@ def _run_with_lxd(verbose: bool=False):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
-                                           '&& python3 ./tests/run_tests.py --perform-on-host'
+                                           '&& python3 ./scripts/run_tests.py --perform-on-host'
                                            + (' --verbose' if verbose else '')]
         container_image = 'ubuntu:{}'.format(release)
         container_name = 'ubup-tests-runner-{}'.format(release)

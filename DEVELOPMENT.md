@@ -50,13 +50,13 @@ Install Docker by running:
 snap install docker
 ```
 
-Use the `tests/run_tests.py` script to run tests.
+Use the `scripts/run_tests.py` script to run tests.
 
 Switch between container engines using the `--docker` or `--lxd` command line options.
 If you're using docker, you need to run the tests with `--build-docker-images`
 at least once.
 
-See `./tests/run_tests.py --help` for more options.
+See `./scripts/run_tests.py --help` for more options.
 
 ## Packaging
 

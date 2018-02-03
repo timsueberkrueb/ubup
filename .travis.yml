@@ -8,5 +8,5 @@ python:
 install:
   - pip install click pycodestyle
 script:
-  - python3 ./tests/run_tests.py --build-docker-images --docker --verbose
-  - python3 ./tests/check_code_style.py
+  - python3 ./scripts/run_tests.py --build-docker-images --docker --verbose
+  - python3 ./scripts/check_code_style.py
