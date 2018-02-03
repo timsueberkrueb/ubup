@@ -3,10 +3,11 @@
 
 import os
 import subprocess
-import time
 import tempfile
 
 import click
+
+import container_utils
 
 
 SOURCE_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -17,51 +18,6 @@ SUPPORTED_UBUNTU_RELEASES = (
     'xenial',    # 16.04
     'artful',    # 17.10
 )
-
-
-_CONTAINER_ENGINE_MISSING_MESSAGE = '''LXD or Docker are required in order to run tests without polluting the host system.
-Switch between container engines using the --docker or --lxd command line options.
-Install LXD it by running:
-$ snap install lxd
-and set it up by running:
-$ lxd init
-Install Docker by running:
-$ snap install docker
-'''
-
-
-def _check_is_lxd_installed():
-    try:
-        subprocess.check_call(['lxd', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except FileNotFoundError:
-        raise click.ClickException('LXD doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
-
-
-def _check_is_docker_installed():
-    try:
-        subprocess.check_call(['docker', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except FileNotFoundError:
-        raise click.ClickException('Docker doesn\'t seem to be installed on your system or is not in $PATH.\n'
-                                   + _CONTAINER_ENGINE_MISSING_MESSAGE)
-
-
-def _docker_wait_for_snapd(container_name):
-    print('Waiting for snapd to start up ...')
-    ready = False
-    retry_count = 25
-    probe = ['docker', 'exec', container_name, 'pgrep', 'snapd']
-    while not ready:
-        time.sleep(1)
-        try:
-            result = subprocess.check_call(probe)
-            ready = result == 0
-        except subprocess.CalledProcessError:
-            ready = False
-            retry_count -= 1
-            if retry_count == 0:
-                raise ConnectionError("Error: snapd not running.")
-    print('Snapd is up and running.')
 
 
 def _run_with_docker(verbose: bool=False):
@@ -83,7 +39,7 @@ def _run_with_docker(verbose: bool=False):
 
         try:
             # Wait for snapd to start up
-            _docker_wait_for_snapd(container_name)
+            container_utils.docker_wait_for_snapd(container_name)
             # Edge core snap currently required
             subprocess.check_call(['docker', 'exec', '-i', container_name, 'snap', 'install', 'core', '--edge'])
             # Push the source code to the container
@@ -126,28 +82,6 @@ def _build_docker_images():
                                   cwd=os.path.join(tempdir))
 
 
-def _lxc_wait_for_network(container_name):
-    print('Waiting for a network connection ...')
-    connected = False
-    retry_count = 25
-    network_probe = 'import urllib.request; urllib.request.urlopen("{}", timeout=5)' \
-        .format('http://start.ubuntu.com/connectivity-check.html')
-    while not connected:
-        time.sleep(1)
-        try:
-            result = subprocess.check_call(
-                ['lxc', 'exec', container_name, '--',
-                 'python3', '-c', "'" + network_probe + "'"]
-            )
-            connected = result == 0
-        except subprocess.CalledProcessError:
-            connected = False
-            retry_count -= 1
-            if retry_count == 0:
-                raise ConnectionError("No network connection")
-    print('Network connection established')
-
-
 def _run_with_lxd(verbose: bool=False):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
@@ -160,7 +94,7 @@ def _run_with_lxd(verbose: bool=False):
         try:
             # Push the source code to the container
             subprocess.check_call(['lxc', 'file', 'push', '-r', SOURCE_ROOT, container_name + '/root'])
-            _lxc_wait_for_network(container_name)
+            container_utils.lxd_wait_for_network(container_name)
             # Update and upgrade our fresh container
             subprocess.check_call(['lxc', 'exec', container_name, '--', 'apt-get', 'update'])
             subprocess.check_call(['lxc', 'exec', container_name, '--', 'apt-get', '-y', 'upgrade'])
@@ -204,15 +138,15 @@ def _run_on_host(verbose: bool=False):
                    'You should not invoke this manually.')
 def main(verbose: bool=False, docker: bool=False, build_docker_images: bool=False, perform_on_host: bool=False):
     if build_docker_images:
-        _check_is_docker_installed()
+        container_utils.check_is_docker_installed()
         _build_docker_images()
     if perform_on_host:
         _run_on_host(verbose)
     elif docker:
-        _check_is_docker_installed()
+        container_utils.check_is_docker_installed()
         _run_with_docker(verbose)
     else:
-        _check_is_lxd_installed()
+        container_utils.check_is_lxd_installed()
         _run_with_lxd(verbose)
 
 

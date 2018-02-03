@@ -7,7 +7,6 @@ import pycodestyle
 
 
 SOURCE_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-TESTS_DIR = os.path.join(SOURCE_ROOT, 'tests')
 
 
 def main():
@@ -20,7 +19,7 @@ def main():
     print('Checking code style ...')
     report = pycodestyle.StyleGuide(
         max_line_length=120
-    ).check_files("..")
+    ).check_files([SOURCE_ROOT])
     print('Done.')
     if report.get_count() > 0:
         sys.exit(1)
