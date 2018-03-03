@@ -34,7 +34,8 @@ def _build_release(release_version: str):
                                'apt-get', '-y', 'install', 'python3', 'python3-pip'])
         # Install ubup dependencies as well as pyinstaller
         subprocess.check_call(['lxc', 'exec', container_name, '--',
-                               'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2', 'pyinstaller'])
+                               'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2', 'pyinstaller',
+                               'requests'])
         # Make a release build
         subprocess.check_call(['lxc', 'exec', container_name, '--', 'bash', '-c',
                                'cd /root/ubup && pyinstaller -F -n ubup main.py'])
