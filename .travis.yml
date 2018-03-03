@@ -1,12 +1,21 @@
 sudo: required
 dist: trusty
-services:
-  - docker
+sudo: required
 language: python
 python:
   - "3.5"
 install:
   - pip install click pycodestyle
 script:
-  - python3 ./scripts/run_tests.py --build-docker-images --docker --verbose
-  - python3 ./scripts/check_code_style.py
+  - sudo apt-get update
+  - sudo apt-get install --yes snapd
+  - sudo apt-get remove --yes lxd lxd-client
+  - sudo snap install core
+  - sudo snap install lxd
+  - for i in $(seq 12); do sudo /snap/bin/lxd waitready --timeout=10 >/dev/null 2>&1 && break; done
+  - sudo /snap/bin/lxd init --auto
+  - sudo /snap/bin/lxc network create testbr0
+  - sudo /snap/bin/lxc network attach-profile testbr0 default eth0
+  - export PATH="/snap/bin:$PATH"
+  - sudo env "PATH=$PATH" python3.5 ./scripts/run_tests.py --lxd --verbose
+  - python3.5 ./scripts/check_code_style.py
