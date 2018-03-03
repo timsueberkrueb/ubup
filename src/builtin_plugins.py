@@ -355,6 +355,7 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
             schema.Optional('classic'): bool,
             schema.Optional('devmode'): bool,
             schema.Optional('jailmode'): bool,
+            schema.Optional('dangerous'): bool
         },
     ]
 
@@ -368,6 +369,8 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
             # is used, but this may change in the future!
             if isinstance(package, dict):
                 package_name = package['package']
+                if package_name.endswith('.snap'):
+                    package_name = self._expand_path(package_name)
                 cmd = ['snap', 'install']
                 if 'channel' in package:
                     cmd += ['--channel', package['channel']]
@@ -377,9 +380,13 @@ class SnapPackagesPlugin(plugins.AbstractPlugin):
                     cmd += ['--devmode']
                 if 'jailmode' in package and package['jailmode']:
                     cmd += ['--jailmode']
+                if 'dangerous' in package and package['dangerous']:
+                    cmd += ['--dangerous']
                 cmd += [package_name]
                 self.run_command_sudo(*cmd)
             else:
+                if package.endswith('.snap'):
+                    package = self._expand_path(package)
                 self.run_command_sudo('snap', 'install', package)
 
 

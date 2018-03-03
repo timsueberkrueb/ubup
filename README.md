@@ -304,9 +304,10 @@ provide a dictionary with additional options:
 * `package: <str>`: Name of the package to install (required)
 * `classic: <true|false>`: Toggle classic [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
 * `channel: <track>/<risk level>/<branch>`: [Snap channel](https://docs.snapcraft.io/reference/channels) (optional)
-* `jailmode <true|false>`: Toggle enforcement of strict [confinement](https://docs.snapcraft.io/reference/confinement)
+* `jailmode: <true|false>`: Toggle enforcement of strict [confinement](https://docs.snapcraft.io/reference/confinement)
   (optional)
-* `devmode <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
+* `devmode: <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
+* `dangerous: <true|false>`: Install the given snap file even if there are no signatures for it
 
 ```yaml
 $snap-packages:
