@@ -301,13 +301,13 @@ Install a set of snap packages.
 You can either just define the names of the packages to install or
 provide a dictionary with additional options:
 
-* `package: <str>`: Name of the package to install (required)
+* `package: <str>`: Name of the package to install or `.snap` filename (required)
 * `classic: <true|false>`: Toggle classic [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
 * `channel: <track>/<risk level>/<branch>`: [Snap channel](https://docs.snapcraft.io/reference/channels) (optional)
 * `jailmode: <true|false>`: Toggle enforcement of strict [confinement](https://docs.snapcraft.io/reference/confinement)
   (optional)
 * `devmode: <true|false>`: Toggle developer mode [confinement](https://docs.snapcraft.io/reference/confinement) (optional)
-* `dangerous: <true|false>`: Install the given snap file even if there are no signatures for it
+* `dangerous: <true|false>`: Install the given snap file even if there are no signatures for it (optional)
 
 ```yaml
 $snap-packages:
