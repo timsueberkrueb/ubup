@@ -56,7 +56,7 @@ def _run_with_docker(verbose: bool=False):
                                    'apt-get', '-y', 'install', 'python3', 'python3-pip'])
             # Install ubup dependencies
             subprocess.check_call(['docker', 'exec', '-i', container_name,
-                                   'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2'])
+                                   'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2', 'requests'])
             # Install test requirements
             subprocess.check_call(['docker', 'exec', '-i', container_name, 'pip3', 'install', 'pytest'])
             # Run the test suite in the container
@@ -106,7 +106,7 @@ def _run_with_lxd(verbose: bool=False):
                                    'apt-get', '-y', 'install', 'python3', 'python3-pip'])
             # Install ubup dependencies
             subprocess.check_call(['lxc', 'exec', container_name, '--',
-                                   'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2'])
+                                   'pip3', 'install', 'click', 'ruamel.yaml', 'schema', 'progressbar2', 'requests'])
             # Install test requirements
             subprocess.check_call(['lxc', 'exec', container_name, '--', 'pip3', 'install', 'pytest'])
             # Run the test suite in the container
