@@ -242,6 +242,23 @@ $folders:
   # ...
 ```
 
+### github-releases
+
+Download GitHub release assets.
+Each asset is defined as a dictionary with the following keys:
+* `repo: <user>/<repo>`: GitHub repository
+* `release`: GitHub release (tag or `latest`)
+* `asset`: Asset to download (either the full filename or a regex)
+* `target`: Target filename to save the asset as
+
+```yaml
+$github-releases:
+  - repo: user/repo
+    release: v1.2.3
+    asset: MyAsset-[0-9.]+.zip
+    target: ~/Documents/MyAsset.zip
+```
+
 ### ppas
 
 Add a set of PPAs unless they are already active.

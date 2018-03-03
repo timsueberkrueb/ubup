@@ -11,6 +11,8 @@ import schema
 import shutil
 import urllib.parse
 import urllib.request
+import requests
+import json
 
 from . import plugins
 
@@ -248,6 +250,43 @@ class FlatpakRepositoriesPlugin(_AbstractFlatpakPlugin):
                 self.run_command(*cmd)
 
 
+class GitHubReleasesPlugin(plugins.AbstractPlugin):
+    key = 'github-releases'
+    schema = [
+        {
+            'repo': str,
+            'release': str,
+            'asset': str,
+            'target': str
+        }
+    ]
+
+    def perform(self):
+        for release in self.config:
+            user, repo = release['repo'].split('/')
+            release_name = release['release']
+            download_asset = release['asset']
+            download_target = self._expand_path(release['target'])
+            if release_name != 'latest' and not release_name.startswith('tags/'):
+                release_name = 'tags/' + release_name
+            url = 'https://api.github.com/repos/{}/{}/releases/{}'.format(user, repo, release_name)
+            response_text = requests.request('GET', url).content.decode()
+            response_json = json.loads(response_text)
+            assets = response_json['assets']
+            found_asset = None
+            for asset in assets:
+                if asset['name'] == download_asset or re.fullmatch(download_asset, asset['name']):
+                    found_asset = asset
+                    break
+            if found_asset is not None:
+                download_url = found_asset['browser_download_url']
+                with urllib.request.urlopen(download_url) as response, open(download_target, 'wb') as out_file:
+                    shutil.copyfileobj(response, out_file)
+            else:
+                raise Exception('Asset "{}" not found in downloads for "{}/{}" "{}"'
+                                .format(download_asset, user, repo, release_name))
+
+
 class PPAsPlugin(plugins.AbstractPlugin):
     key = 'ppas'
     schema = [str]
@@ -350,6 +389,7 @@ BUILTIN_PLUGINS = (
     CreateFoldersPlugin,
     FlatpakPackagesPlugin,
     FlatpakRepositoriesPlugin,
+    GitHubReleasesPlugin,
     PPAsPlugin,
     ScriptletPlugin,
     ScriptsPlugin,
