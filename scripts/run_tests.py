@@ -16,7 +16,8 @@ TESTS_DIR = os.path.join(SOURCE_ROOT, 'tests')
 
 SUPPORTED_UBUNTU_RELEASES = (
     'xenial',    # 16.04
-    'artful',    # 17.10
+    # FIXME: Disabled right
+    # 'artful',    # 17.10
 )
 
 

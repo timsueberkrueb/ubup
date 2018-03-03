@@ -53,21 +53,10 @@ def docker_wait_for_snapd(container_name):
 
 def lxd_wait_for_network(container_name):
     print('Waiting for a network connection ...')
-    connected = False
-    retry_count = 25
-    network_probe = 'import urllib.request; urllib.request.urlopen("{}", timeout=5)' \
-        .format('http://start.ubuntu.com/connectivity-check.html')
-    while not connected:
-        time.sleep(1)
-        try:
-            result = subprocess.check_call(
-                ['lxc', 'exec', container_name, '--',
-                 'python3', '-c', "'" + network_probe + "'"]
-            )
-            connected = result == 0
-        except subprocess.CalledProcessError:
-            connected = False
-            retry_count -= 1
-            if retry_count == 0:
-                raise ConnectionError("No network connection")
-    print('Network connection established')
+    result = subprocess.check_call(
+        ['lxc', 'exec', container_name, '--',
+         'sh', '-c', "for i in {1..50}; do ping -c1 www.ubuntu.com &> /dev/null && break; done"]
+    )
+    time.sleep(5)
+    if result == 0:
+        print('Network connection established')
