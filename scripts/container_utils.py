@@ -36,7 +36,7 @@ def check_is_lxd_installed():
 def docker_wait_for_snapd(container_name):
     print('Waiting for snapd to start up ...')
     ready = False
-    retry_count = 25
+    retry_count = 90
     probe = ['docker', 'exec', container_name, 'pgrep', 'snapd']
     while not ready:
         time.sleep(1)

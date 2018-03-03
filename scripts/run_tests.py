@@ -38,6 +38,8 @@ def _run_with_docker(verbose: bool=False):
         subprocess.check_call(['docker', 'start', container_name])
 
         try:
+            # Start snapd
+            subprocess.check_call(['docker', 'exec', '-i', container_name, 'systemctl', 'start', 'snapd'])
             # Wait for snapd to start up
             container_utils.docker_wait_for_snapd(container_name)
             # Edge core snap currently required
