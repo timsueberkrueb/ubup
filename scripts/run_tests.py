@@ -20,11 +20,12 @@ SUPPORTED_UBUNTU_RELEASES = (
 )
 
 
-def _run_with_docker(verbose: bool=False):
+def _run_with_docker(verbose: bool=False, file_or_dir: str=None):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
-                                           '&& python3 ./scripts/run_tests.py --perform-on-host'
+                                           '&& python3 ./scripts/run_tests.py {} --perform-on-host'
+                                           .format(file_or_dir or '')
                                            + (' --verbose' if verbose else '')]
         container_name = 'ubup-tests-runner-{}'.format(release)
 
@@ -84,11 +85,12 @@ def _build_docker_images():
                                   cwd=os.path.join(tempdir))
 
 
-def _run_with_lxd(verbose: bool=False):
+def _run_with_lxd(verbose: bool=False, file_or_dir: str=None):
     for release in SUPPORTED_UBUNTU_RELEASES:
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
-                                           '&& python3 ./scripts/run_tests.py --perform-on-host'
+                                           '&& python3 ./scripts/run_tests.py {} --perform-on-host'
+                                           .format(file_or_dir or '')
                                            + (' --verbose' if verbose else '')]
         container_image = 'ubuntu:{}'.format(release)
         container_name = 'ubup-tests-runner-{}'.format(release)
@@ -122,34 +124,38 @@ def _run_with_lxd(verbose: bool=False):
             raise e
 
 
-def _run_on_host(verbose: bool=False):
+def _run_on_host(verbose: bool=False, file_or_dir: str=None):
     env = os.environ
     env['PYTHONPATH'] = SOURCE_ROOT
     cmd = ['pytest']
+    if file_or_dir:
+        cmd += [file_or_dir]
     if verbose:
         cmd += ['--verbose', '--capture=no']
     subprocess.check_call(cmd, cwd=TESTS_DIR, env=env)
 
 
 @click.command()
+@click.argument('file_or_dir', default=None)
 @click.option('--verbose', default=False, is_flag=True, help='Enable verbose output.')
 @click.option('--docker/--lxd', default=False, is_flag=True, help='Container engine to use')
 @click.option('--build-docker-images', default=False, is_flag=True, help='Build Docker images')
 @click.option('--perform-on-host', default=False, is_flag=True,
               help='Perform tests on the host rather than inside of a container. '
                    'You should not invoke this manually.')
-def main(verbose: bool=False, docker: bool=False, build_docker_images: bool=False, perform_on_host: bool=False):
+def main(file_or_dir: str=None, verbose: bool=False, docker: bool=False, build_docker_images: bool=False,
+         perform_on_host: bool = False):
     if build_docker_images:
         container_utils.check_is_docker_installed()
         _build_docker_images()
     if perform_on_host:
-        _run_on_host(verbose)
+        _run_on_host(verbose, file_or_dir)
     elif docker:
         container_utils.check_is_docker_installed()
-        _run_with_docker(verbose)
+        _run_with_docker(verbose, file_or_dir)
     else:
         container_utils.check_is_lxd_installed()
-        _run_with_lxd(verbose)
+        _run_with_lxd(verbose, file_or_dir)
 
 
 if __name__ == '__main__':
