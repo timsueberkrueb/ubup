@@ -14,7 +14,7 @@ ubup Development
 On Ubuntu 16.04 or later, run:
 ```bash
 apt-get install python3 python3-pip
-pip3 install click ruamel.yaml schema progressbar2
+pip3 install click ruamel.yaml schema progressbar2 requests
 ```
 
 ## Setup
