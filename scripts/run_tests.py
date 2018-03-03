@@ -136,7 +136,7 @@ def _run_on_host(verbose: bool=False, file_or_dir: str=None):
 
 
 @click.command()
-@click.argument('file_or_dir', default=None)
+@click.argument('file_or_dir', default='')
 @click.option('--verbose', default=False, is_flag=True, help='Enable verbose output.')
 @click.option('--docker/--lxd', default=False, is_flag=True, help='Container engine to use')
 @click.option('--build-docker-images', default=False, is_flag=True, help='Build Docker images')
