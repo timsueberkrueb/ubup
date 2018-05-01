@@ -2,10 +2,10 @@ ubup
 ====
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![GitHub release](https://img.shields.io/github/release/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/releases)
-[![Build Status](https://travis-ci.org/tim-sueberkrueb/ubup.svg?branch=develop)](https://travis-ci.org/tim-sueberkrueb/ubup)
-[![GitHub issues](https://img.shields.io/github/issues/tim-sueberkrueb/ubup.svg)](https://github.com/tim-sueberkrueb/ubup/issues)
-[![Maintained](https://img.shields.io/maintenance/yes/2018.svg)](https://github.com/tim-sueberkrueb/ubup/commits/develop)
+[![GitHub release](https://img.shields.io/github/release/timsueberkrueb/ubup.svg)](https://github.com/timsueberkrueb/ubup/releases)
+[![Build Status](https://travis-ci.org/timsueberkrueb/ubup.svg?branch=develop)](https://travis-ci.org/timsueberkrueb/ubup)
+[![GitHub issues](https://img.shields.io/github/issues/timsueberkrueb/ubup.svg)](https://github.com/timsueberkrueb/ubup/issues)
+[![Maintained](https://img.shields.io/maintenance/yes/2018.svg)](https://github.com/timsueberkrueb/ubup/commits/develop)
 
 🚀 **Ub**untu set**up** utility.
 
@@ -95,7 +95,7 @@ Optionally, you can specify some additional metadata:
 ```yaml
 author: John Doe <john.doe@example.com>
 description: |
-  Tested on Ubuntu 17.10
+  My personal setup configuration.
   ...
 setup:
   foo: # category
@@ -141,7 +141,7 @@ Add the `ubup` repository as a submodule:
 ```
 # Note: It is recommended to use the master branch to
 # ensure you run with a stable version of ubup.
-git submodule add -b master https://github.com/tim-sueberkrueb/ubup.git
+git submodule add -b master https://github.com/timsueberkrueb/ubup.git
 git submodule update --init
 ```
 
