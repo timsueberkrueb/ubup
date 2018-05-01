@@ -11,13 +11,16 @@ import container_utils
 
 SOURCE_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-UBUNTU_RELEASE = 'xenial'  # 16.04
+SUPPORTED_UBUNTU_RELEASES = (
+    'bionic',    # 18.04
+    'xenial',    # 16.04
+)
 RELEASE_ARCH = 'x86_64'
 
 
-def _build_release(release_version: str):
-    container_image = 'ubuntu:{}'.format(UBUNTU_RELEASE)
-    container_name = 'ubup-release-builder-{}'.format(UBUNTU_RELEASE)
+def _build_release(release_version: str, ubuntu_release: str):
+    container_image = 'ubuntu:{}'.format(ubuntu_release)
+    container_name = 'ubup-release-builder-{}'.format(ubuntu_release)
     subprocess.check_call(['lxc', 'launch', '-e', container_image, container_name])
     try:
         # Push the source code to the container
@@ -43,7 +46,7 @@ def _build_release(release_version: str):
         os.makedirs(os.path.join(SOURCE_ROOT, 'dist'), exist_ok=True)
         subprocess.check_call(['lxc', 'file', 'pull', container_name + '/root/ubup/dist/ubup',
                                os.path.join(SOURCE_ROOT, 'dist', 'ubup-{}-{}-{}'.format(release_version,
-                                                                                        UBUNTU_RELEASE,
+                                                                                        ubuntu_release,
                                                                                         RELEASE_ARCH))])
 
         # Delete the container
@@ -59,7 +62,8 @@ def _build_release(release_version: str):
 @click.argument('release_version')
 def main(release_version: str):
     container_utils.check_is_lxd_installed()
-    _build_release(release_version)
+    for ubuntu_release in SUPPORTED_UBUNTU_RELEASES:
+        _build_release(release_version, ubuntu_release)
 
 
 if __name__ == '__main__':
