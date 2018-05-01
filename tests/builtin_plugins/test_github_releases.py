@@ -21,7 +21,7 @@ $github-releases:
     target: /tmp/ubup-download-v0.1.0
   - repo: tim-sueberkrueb/ubup
     release: latest
-    asset:  ubup-[0-9.]+-[\w]+-x86_64
+    asset:  ubup-[0-9.]+-[\\w]+-x86_64
     target: /tmp/ubup-download-latest
 '''
 

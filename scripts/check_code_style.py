@@ -18,6 +18,7 @@ def main():
     """
     print('Checking code style ...')
     report = pycodestyle.StyleGuide(
+        ignore='E252',
         max_line_length=120
     ).check_files([SOURCE_ROOT])
     print('Done.')

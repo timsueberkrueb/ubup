@@ -26,8 +26,7 @@ def _run_with_docker(verbose: bool=False, file_or_dir: str=None):
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
                                            '&& python3 ./scripts/run_tests.py {} --perform-on-host'
-                                           .format(file_or_dir or '')
-                                           + (' --verbose' if verbose else '')]
+                                           .format(file_or_dir or '') + (' --verbose' if verbose else '')]
         container_name = 'ubup-tests-runner-{}'.format(release)
 
         # Source: https://github.com/ogra1/snapd-docker
@@ -91,8 +90,7 @@ def _run_with_lxd(verbose: bool=False, file_or_dir: str=None):
         run_tests_command = ['bash', '-c', 'export LC_ALL=C.UTF-8 && export LANG=C.UTF-8 '
                                            '&& cd /root/ubup '
                                            '&& python3 ./scripts/run_tests.py {} --perform-on-host'
-                                           .format(file_or_dir or '')
-                                           + (' --verbose' if verbose else '')]
+                                           .format(file_or_dir or '') + (' --verbose' if verbose else '')]
         container_image = 'ubuntu:{}'.format(release)
         container_name = 'ubup-tests-runner-{}'.format(release)
         subprocess.check_call(['lxc', 'launch', '-e', container_image, container_name])
