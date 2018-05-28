@@ -15,11 +15,11 @@ $github-releases:
 
 _REAL_CONFIG = '''
 $github-releases:
-  - repo: tim-sueberkrueb/ubup
+  - repo: timsueberkrueb/ubup
     release: v0.1.0
     asset:  ubup-[0-9.]+-xenial-x86_64
     target: /tmp/ubup-download-v0.1.0
-  - repo: tim-sueberkrueb/ubup
+  - repo: timsueberkrueb/ubup
     release: latest
     asset:  ubup-[0-9.]+-[\\w]+-x86_64
     target: /tmp/ubup-download-latest
