@@ -187,8 +187,7 @@ The list may contain the following types of elements:
 * `.flatpakref` filename or url
 * `.flatpak` filename or url
 * A directory for more options:
-  * `from: <.flatpakref url or filename>`
-    **or** `bundle: <.flatpak url or filename>` (required)
+  * `package: <.flatpakref url or filename>` (required)
   * `remote: <str>`: The remote repository to look for the app or runtime (optional)
   * `target: <system|user>`: Whether to install the flatpak for the
     current user or system-wide (optional, default is `system`)
