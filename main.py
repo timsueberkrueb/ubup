@@ -43,17 +43,17 @@ def setup(config_path: str, no_roots: bool=False, verbose: bool=False, rerun: bo
 
     log.success('🚀 Performing your setup.', bold=True)
 
-    cfg = config.StatefulConfig(config_dir, rerun)
-    cfg.load_plugins()
-    cfg.load_config_file(setup_filename)
+    setup = config.Setup(config_dir, rerun)
+    setup.load_plugins()
+    setup.load_config_file(setup_filename)
 
-    cfg.perform(indent=not (no_roots or verbose), verbose=verbose)
+    setup.perform(indent=not (no_roots or verbose), verbose=verbose)
 
-    if cfg.skipped_steps_count > 0:
-        if cfg.skipped_steps_count == 0:
+    if setup.skipped_steps_count > 0:
+        if setup.skipped_steps_count == 0:
             log.warning('1 step was skipped because it was already run.')
         else:
-            log.warning('{} steps were skipped because they were already run.'.format(cfg.skipped_steps_count))
+            log.warning('{} steps were skipped because they were already run.'.format(setup.skipped_steps_count))
 
     log.regular('Run with --rerun to run all steps even if they were already run.')
 

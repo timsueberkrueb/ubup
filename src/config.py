@@ -64,7 +64,7 @@ class SetupError(Exception):
     pass
 
 
-class StatefulConfig:
+class Setup:
     def __init__(self, data_path: str, rerun: bool = False):
         self._data_path = data_path
         self._root: tree.Category = None
