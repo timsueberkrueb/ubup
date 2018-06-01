@@ -67,12 +67,12 @@ class SetupError(Exception):
 class Setup:
     def __init__(self, data_path: str = None, rerun: bool = False):
         self._data_path = data_path
-        self._root: tree.Category = None
+        self._root = None
 
         self._action_schema = {}
         self._schema_root = {}
         self._rerun = rerun
-        self._state: state.ConfigState = None
+        self._state = None
         self._skipped_count = 0
 
     @property
