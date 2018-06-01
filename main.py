@@ -5,6 +5,9 @@ import sys
 import os
 import click
 import random
+import subprocess
+import time
+import threading
 
 from src import config
 from src import log
@@ -23,6 +26,8 @@ def cli(ctx: click.Context, **_):
 @options.setup_options
 def setup(config_path: str, no_roots: bool=False, verbose: bool=False, rerun: bool=False):
     _require_root()
+    refresh_sudo_thread = threading.Thread(target=_refresh_sudo, daemon=True)
+    refresh_sudo_thread.start()
 
     if os.path.isdir(config_path):
         setup_filename = os.path.join(config_path, 'setup.yaml')
@@ -92,6 +97,15 @@ def _require_root():
 
         # Replace the current process
         os.execlpe('sudo', *args)
+
+
+def _refresh_sudo():
+    # Update the sudo timestamp each minute
+    # This makes sure the user doesn't need to reenter
+    # his root password after a long-running process
+    while True:
+        subprocess.call(['sudo', '-v'])
+        time.sleep(60)
 
 
 if __name__ == '__main__':
