@@ -65,7 +65,7 @@ class SetupError(Exception):
 
 
 class Setup:
-    def __init__(self, data_path: str, rerun: bool = False):
+    def __init__(self, data_path: str = None, rerun: bool = False):
         self._data_path = data_path
         self._root: tree.Category = None
 
