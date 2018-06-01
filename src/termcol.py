@@ -2,6 +2,7 @@
 
 
 class COLORS:
+    DEFAULT = ''
     HEADER = '\033[95m'
     INFORMATION = '\033[94m'
     SUCCESS = '\033[92m'
@@ -39,6 +40,5 @@ def warning(text: str, bold: bool=False, underline: bool=False) -> str:
 def error(text: str, bold: bool=False, underline: bool=False) -> str:
     return _colorize(text, COLORS.ERROR, bold=bold, underline=underline)
 
-
 def regular(text: str, bold: bool=False, underline: bool=False) -> str:
-    return _colorize(text, COLORS.BOLD, bold=bold, underline=underline)
+    return _colorize(text, COLORS.DEFAULT, bold=bold, underline=underline)

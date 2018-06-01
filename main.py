@@ -8,20 +8,20 @@ import random
 
 from src import config
 from src import log
+from src import options
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
-def cli(ctx: click.Context):
+@options.setup_options
+def cli(ctx: click.Context, **_):
     if ctx.invoked_subcommand is None:
-        ctx.invoke(setup)
+        ctx.forward(setup)
 
 
 @cli.command()
-@click.argument('config_path', default=os.getcwd(), type=click.Path(exists=True, resolve_path=True))
-@click.option('-v', '--verbose', default=False, is_flag=True, help='Enable verbose output. Disables tree-like output.')
-@click.option('--no-roots', default=False, is_flag=True, help='Disable tree-like progress output.')
-def setup(config_path: str, no_roots: bool=False, verbose: bool=False):
+@options.setup_options
+def setup(config_path: str, no_roots: bool=False, verbose: bool=False, rerun: bool=False):
     _require_root()
 
     if os.path.isdir(config_path):
@@ -43,11 +43,19 @@ def setup(config_path: str, no_roots: bool=False, verbose: bool=False):
 
     log.success('🚀 Performing your setup.', bold=True)
 
-    setup = config.Setup(config_dir)
-    setup.load_plugins()
-    setup.load_config_file(setup_filename)
+    cfg = config.StatefulConfig(config_dir, rerun)
+    cfg.load_plugins()
+    cfg.load_config_file(setup_filename)
 
-    setup.perform(indent=not (no_roots or verbose), verbose=verbose)
+    cfg.perform(indent=not (no_roots or verbose), verbose=verbose)
+
+    if cfg.skipped_steps_count > 0:
+        if cfg.skipped_steps_count == 0:
+            log.warning('1 step was skipped because it was already run.')
+        else:
+            log.warning('{} steps were skipped because they were already run.'.format(cfg.skipped_steps_count))
+
+    log.regular('Run with --rerun to run all steps even if they were already run.')
 
     log.success('✓ Setup completed.', bold=True)
 
