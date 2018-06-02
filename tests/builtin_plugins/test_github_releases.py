@@ -19,10 +19,6 @@ $github-releases:
     release: v0.1.0
     asset:  ubup-[0-9.]+-xenial-x86_64
     target: /tmp/ubup-download-v0.1.0
-  - repo: timsueberkrueb/ubup
-    release: latest
-    asset:  ubup-[0-9.]+-[\\w]+-x86_64
-    target: /tmp/ubup-download-latest
 '''
 
 
@@ -38,4 +34,3 @@ def test_real():
     setup.load_config_str(_REAL_CONFIG)
     setup.perform()
     assert os.path.isfile('/tmp/ubup-download-v0.1.0')
-    assert os.path.isfile('/tmp/ubup-download-latest')
