@@ -8,10 +8,15 @@ import random
 import subprocess
 import time
 import threading
+import simpleflock
 
 from src import config
 from src import log
 from src import options
+
+
+LOCK_FILE_DIR = os.path.expanduser('~/.cache/ubup')
+LOCK_FILE_PATH = '{}/lock'.format(LOCK_FILE_DIR)
 
 
 @click.group(invoke_without_command=True)
@@ -26,43 +31,52 @@ def cli(ctx: click.Context, **_):
 @options.setup_options
 def setup(config_path: str, no_roots: bool=False, verbose: bool=False, rerun: bool=False):
     _require_root()
-    refresh_sudo_thread = threading.Thread(target=_refresh_sudo, daemon=True)
-    refresh_sudo_thread.start()
 
-    if os.path.isdir(config_path):
-        setup_filename = os.path.join(config_path, 'setup.yaml')
-    else:
-        setup_filename = config_path
+    os.makedirs(LOCK_FILE_DIR, exist_ok=True)
 
-    if not os.path.isfile(setup_filename):
-        raise click.ClickException('The file {} does not exist.'.format(setup_filename))
-    if not setup_filename[setup_filename.rfind('.')+1:] in ('yaml', 'yml'):
-        raise click.ClickException('The file {} has an unsupported extension. '
-                                   'Supported extensions are *.yaml and *.yml.'
-                                   .format(setup_filename))
+    try:
+        with simpleflock.SimpleFlock(LOCK_FILE_PATH, timeout=0.1):
+            refresh_sudo_thread = threading.Thread(target=_refresh_sudo, daemon=True)
+            refresh_sudo_thread.start()
 
-    config_dir = os.path.dirname(setup_filename)
+            if os.path.isdir(config_path):
+                setup_filename = os.path.join(config_path, 'setup.yaml')
+            else:
+                setup_filename = config_path
 
-    if no_roots and random.SystemRandom().randrange(0, 100) == 42:
-        print('🎶 https://youtu.be/PUdyuKaGQd4 🎶')   # *Totally no easter 🥚*
+            if not os.path.isfile(setup_filename):
+                raise click.ClickException('The file {} does not exist.'.format(setup_filename))
+            if not setup_filename[setup_filename.rfind('.')+1:] in ('yaml', 'yml'):
+                raise click.ClickException('The file {} has an unsupported extension. '
+                                           'Supported extensions are *.yaml and *.yml.'
+                                           .format(setup_filename))
 
-    log.success('🚀 Performing your setup.', bold=True)
+            config_dir = os.path.dirname(setup_filename)
 
-    setup = config.Setup(config_dir, rerun)
-    setup.load_plugins()
-    setup.load_config_file(setup_filename)
+            if no_roots and random.SystemRandom().randrange(0, 100) == 42:
+                print('🎶 https://youtu.be/PUdyuKaGQd4 🎶')   # *Totally no easter 🥚*
 
-    setup.perform(indent=not (no_roots or verbose), verbose=verbose)
+            log.success('🚀 Performing your setup.', bold=True)
 
-    if setup.skipped_steps_count > 0:
-        if setup.skipped_steps_count == 0:
-            log.warning('1 step was skipped because it was already run.')
-        else:
-            log.warning('{} steps were skipped because they were already run.'.format(setup.skipped_steps_count))
+            setup = config.Setup(config_dir, rerun)
+            setup.load_plugins()
+            setup.load_config_file(setup_filename)
 
-    log.regular('Run with --rerun to run all steps even if they were already run.')
+            setup.perform(indent=not (no_roots or verbose), verbose=verbose)
 
-    log.success('✓ Setup completed.', bold=True)
+            if setup.skipped_steps_count > 0:
+                if setup.skipped_steps_count == 0:
+                    log.warning('1 step was skipped because it was already run.')
+                else:
+                    log.warning('{} steps were skipped because they were already run.'.format(setup.skipped_steps_count))
+
+            log.regular('Run with --rerun to run all steps even if they were already run.')
+
+            log.success('✓ Setup completed.', bold=True)
+    except BlockingIOError:
+        log.error('Another ubup process seems to be running.')
+        log.error('Please wait for the other process to complete.')
+        sys.exit(1)
 
 
 def _require_root():

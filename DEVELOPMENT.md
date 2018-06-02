@@ -10,11 +10,12 @@ ubup Development
   * ruamel.yaml
   * schema
   * progressbar2
+  * simpleflock
 
 On Ubuntu 16.04 or later, run:
 ```bash
 apt-get install python3 python3-pip
-pip3 install click ruamel.yaml schema progressbar2 requests
+pip3 install click ruamel.yaml schema progressbar2 requests simpleflock
 ```
 
 ## Setup
