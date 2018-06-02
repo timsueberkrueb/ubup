@@ -96,7 +96,7 @@ class Setup:
 
         self.load_config(data)
 
-        self._state = state.ConfigState(self._data_path, filename)
+        self._state = state.ConfigState()
         if self._state.exists:
             self._state.load()
 

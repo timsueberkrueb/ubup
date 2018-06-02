@@ -7,17 +7,16 @@ import ruamel.yaml as yaml
 from . import tree
 
 
+STATE_CONFIG_DIR = os.path.expanduser('~/.config/ubup')
+STATE_CONFIG_PATH = '{}/state.yaml'.format(STATE_CONFIG_DIR)
+
+
 class ConfigState:
-    def __init__(self, data_path: str, filename: str, remote: str = 'local'):
+    def __init__(self):
         self._performed_actions = []
-        self._data_path = data_path
-        self._state_dir = os.path.join(data_path, '.ubup')
-        if not os.path.isdir(self._state_dir):
-            os.makedirs(self._state_dir, exist_ok=True)
-        self._state_filepath = os.path.join(
-            self._state_dir,
-            'state_{}_{}.yaml'.format(remote, self._encode_filename(filename))
-        )
+        if not os.path.isdir(STATE_CONFIG_DIR):
+            os.makedirs(STATE_CONFIG_DIR, exist_ok=True)
+        self._state_filepath = STATE_CONFIG_PATH
 
     @property
     def exists(self) -> bool:
