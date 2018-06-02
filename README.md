@@ -121,35 +121,6 @@ ubup
 
 in the folder that contains your `setup.yaml`.
 
-## Configuration with Git
-
-By creating a Git repository with your configuration, you can
-not only easily host it on your preferred Git hosting service but
-you can also add ubup as a Git submodule. This minimizes your
-installation steps and ensures you always run with a version
-of ubup that you tested your setup against.
-
-Create a new repository:
-
-```
-mkdir ubuntu-post-install && cd ubuntu-post-install
-git init
-```
-
-Add the `ubup` repository as a submodule:
-
-```
-# Note: It is recommended to use the master branch to
-# ensure you run with a stable version of ubup.
-git submodule add -b master https://github.com/timsueberkrueb/ubup.git
-git submodule update --init
-```
-
-Create your `setup.yaml`.
-
-You can now run `./ubup/setup` inside your repository
-to perform your setup.
-
 ## Built-in Plugins
 
 ### apt-packages
