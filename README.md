@@ -377,6 +377,26 @@ please feel encouraged to create a pull request to add it as built-in plugin!
 
 The same goes for extending or improving existing plugins, of course.
 
+## Remote support (experimental)
+
+ubup has experimental support for performing setups remotely via SSH.
+
+To try it out, run:
+
+```
+ubup --remote "user@hostname"
+```
+
+This option is basically just a shortcut running the SSH commands you might
+run manually to copy ubup and your setup instructions to the remote and to run it.
+
+Therefore there are some limitations:
+
+* Only works properly with password-less logins
+* Is disabled when ubup is ran from source
+
+The latter is necessary because ubup temporarily copies itself to the remote machine.
+
 ## Acknowledgements
 
 This software is not endorsed by or affiliated with Ubuntu or Canonical.
