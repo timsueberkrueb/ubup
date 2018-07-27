@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import List
+from typing import List, Optional
 
 import sys
 import os
@@ -11,11 +11,11 @@ from . import log
 
 def perform(setup_filename: str, remote: str):
     if 'UBUP_EXECUTABLE' in os.environ:
-        ubup_executable_path = os.environ['UBUP_EXECUTABLE']
+        ubup_local_exec_path = os.environ['UBUP_EXECUTABLE']
     elif getattr(sys, 'frozen', False):
         # Running in a bundle created by PyInstaller
         # sys.executable points to the bundle
-        ubup_executable_path = sys.executable
+        ubup_local_exec_path = sys.executable
     else:
         # Running in live mode. sys.executable points
         # to the Python interpreter
@@ -33,10 +33,19 @@ def perform(setup_filename: str, remote: str):
 
     log.information('Copying files.')
     _copy_files(config_dir, remote, temp_dir)
-    log.information('Temporarily installing ubup.')
-    _copy_ubup(ubup_executable_path, remote, temp_dir)
+
+    # Check for an existing ubup installation
+    ubup_remote_exec_path = _attempt_find_ubup(remote)
+    if ubup_remote_exec_path is not None:
+        log.information('ubup is already installed remotely.')
+    else:
+        log.information('ubup is not installed remotely.')
+        log.information('Temporarily installing ubup remotely.')
+        _copy_ubup(ubup_local_exec_path, remote, temp_dir)
+        ubup_remote_exec_path = os.path.join(temp_dir, 'ubup')
+
     log.information('Running ubup remotely.')
-    _run_ubup(remote, temp_dir)
+    _run_ubup(remote, temp_dir, ubup_remote_exec_path)
 
 
 def _probe(remote: str):
@@ -53,13 +62,20 @@ def _copy_files(config_dir: str, remote: str, remote_path: str):
     _scp_recursive(remote, config_dir, remote_config_dir)
 
 
+def _attempt_find_ubup(remote: str) -> Optional[str]:
+    try:
+        return _ssh_capture(remote, ['which', 'ubup']).strip()
+    except subprocess.CalledProcessError:
+        return None
+
+
 def _copy_ubup(ubup_executable_path: str, remote: str, remote_path: str):
     _scp(remote, ubup_executable_path, os.path.join(remote_path, 'ubup'))
 
 
-def _run_ubup(remote: str, remote_path: str):
+def _run_ubup(remote: str, remote_path: str, remote_ubup_executable: str):
     args = _argv_without_args(['-p', '--path', '--remote'])
-    _ssh(remote, [os.path.join(remote_path, 'ubup'), '-p', os.path.join(remote_path, 'setup'), *args])
+    _ssh(remote, [remote_ubup_executable, '-p', os.path.join(remote_path, 'setup'), *args])
 
 
 def _ssh(remote: str, command):
