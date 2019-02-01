@@ -75,7 +75,7 @@ def _copy_ubup(ubup_executable_path: str, remote: str, remote_path: str):
 
 def _run_ubup(remote: str, remote_path: str, remote_ubup_executable: str):
     args = _argv_without_args(['-p', '--path', '--remote'])
-    _ssh(remote, [remote_ubup_executable, '-p', os.path.join(remote_path, 'setup'), *args])
+    _ssh(remote, [remote_ubup_executable, 'setup', '-p', os.path.join(remote_path, 'setup'), *args])
 
 
 def _ssh(remote: str, command):
