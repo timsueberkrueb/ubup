@@ -5,7 +5,7 @@ ubup
 [![GitHub release](https://img.shields.io/github/release/timsueberkrueb/ubup.svg)](https://github.com/timsueberkrueb/ubup/releases)
 [![Build Status](https://travis-ci.org/timsueberkrueb/ubup.svg?branch=develop)](https://travis-ci.org/timsueberkrueb/ubup)
 [![GitHub issues](https://img.shields.io/github/issues/timsueberkrueb/ubup.svg)](https://github.com/timsueberkrueb/ubup/issues)
-[![Maintained](https://img.shields.io/maintenance/yes/2018.svg)](https://github.com/timsueberkrueb/ubup/commits/develop)
+[![Maintained](https://img.shields.io/maintenance/yes/2019.svg)](https://github.com/timsueberkrueb/ubup/commits/develop)
 
 🚀 **Ub**untu set**up** utility.
 
